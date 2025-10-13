@@ -40,10 +40,10 @@ class AssistiveTouch {
         this.attachKeyboardShortcuts();
         this.applySettings();
         
-        // Show welcome message
-        setTimeout(() => {
-            this.showToast('💡 Tip: Ctrl+Shift+E để mở menu nhanh!');
-        }, 2000);
+        // Welcome message disabled for cleaner UX
+        // setTimeout(() => {
+        //     this.showToast('Ctrl+Shift+E to open menu');
+        // }, 3000);
     }
     
     // Create floating button
@@ -295,7 +295,8 @@ class AssistiveTouch {
                 this.settings.selectedSeason = season;
                 this.saveSettings();
                 
-                this.showToast(`🌟 Changed to ${season}!`);
+                // Subtle feedback (disabled by default)
+                // this.showToast(`${season}`);
             });
         });
         
@@ -338,8 +339,8 @@ class AssistiveTouch {
                 this.settings.selectedTheme = theme;
                 this.saveSettings();
                 
-                // Show toast
-                this.showToast(`🎨 Theme: ${btn.querySelector('.theme-name').textContent}`);
+                // Show subtle toast (optional - comment out to disable)
+                // this.showToast(`${btn.querySelector('.theme-name').textContent}`);
             });
         });
 
@@ -354,15 +355,15 @@ class AssistiveTouch {
         const applyBtn = this.menu.querySelector('[data-action="applyAll"]');
         applyBtn.addEventListener('click', () => {
             this.saveSettings();
-            this.showToast('✅ Đã lưu cài đặt!');
+            // this.showToast('Saved'); // Disabled - auto-save enabled
             this.closeMenu();
         });
         
         const resetBtn = this.menu.querySelector('[data-action="resetAll"]');
         resetBtn.addEventListener('click', () => {
-            if (confirm('Reset tất cả về mặc định?')) {
+            if (confirm('Reset all settings to default?')) {
                 this.resetSettings();
-                this.showToast('🔄 Đã reset!');
+                this.showToast('Reset');
             }
         });
     }
@@ -547,7 +548,7 @@ class AssistiveTouch {
     resetSettings() {
         this.settings = this.getDefaultSettings();
         this.saveSettings();
-        this.showToast('🔄 Đã reset! Reloading...');
+        this.showToast('Reset');
         setTimeout(() => location.reload(), 1000);
     }
     
@@ -646,7 +647,7 @@ class AssistiveTouch {
             if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'e') {
                 e.preventDefault();
                 this.toggleMenu();
-                this.showToast('⌨️ Menu toggled via keyboard');
+                // No toast - keyboard shortcut is silent
             }
             
             // Ctrl/Cmd + Shift + R → Reset settings
@@ -726,14 +727,13 @@ class AssistiveTouch {
             cb.checked = newState;
         });
         
-        // Save and notify
+        // Save settings
         this.saveSettings();
         
+        // Visual feedback only (no toast)
         if (newState) {
-            this.showToast('✨ All effects enabled!');
             this.button.style.animation = 'pulse-glow 1s ease-out';
         } else {
-            this.showToast('🌙 All effects disabled (Battery save mode)');
             this.button.style.animation = 'none';
         }
         
@@ -743,17 +743,31 @@ class AssistiveTouch {
     }
     
     // Toast notification
-    showToast(message) {
+    // Show toast notification - Modern & Subtle
+    showToast(message, duration = 1500) {
+        // Remove existing toasts
+        document.querySelectorAll('.at-toast').forEach(t => t.remove());
+        
         const toast = document.createElement('div');
         toast.className = 'at-toast';
-        toast.textContent = message;
+        toast.innerHTML = `
+            <div class="at-toast-content">
+                <span class="at-toast-icon">✓</span>
+                <span class="at-toast-message">${message}</span>
+            </div>
+        `;
         document.body.appendChild(toast);
         
-        setTimeout(() => toast.classList.add('at-toast-show'), 10);
+        // Trigger animation
+        requestAnimationFrame(() => {
+            toast.classList.add('at-toast-show');
+        });
+        
+        // Auto hide
         setTimeout(() => {
             toast.classList.remove('at-toast-show');
             setTimeout(() => toast.remove(), 300);
-        }, 2000);
+        }, duration);
     }
 }
 

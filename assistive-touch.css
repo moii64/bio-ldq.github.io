@@ -23,6 +23,19 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     opacity: 0.85 !important;
     visibility: visible !important;
+    /* Mobile touch optimization */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* Mobile: Larger touch target and better positioning */
+@media (max-width: 768px) {
+    .assistive-touch-btn {
+        width: 56px;
+        height: 56px;
+        right: 16px;
+        bottom: 80px; /* Higher to avoid bottom navigation */
+    }
 }
 
 .assistive-touch-btn:hover {
@@ -95,6 +108,18 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Mobile: Full width menu with better spacing */
+@media (max-width: 768px) {
+    .assistive-touch-menu {
+        left: 10px;
+        right: 10px;
+        bottom: 150px;
+        width: auto;
+        max-height: 70vh;
+        border-radius: 20px;
+    }
 }
 
 .assistive-touch-menu.at-menu-open {
@@ -216,6 +241,22 @@
     transition: all 0.25s ease;
     font-size: 13px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Mobile touch optimization */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    min-height: 44px;
+}
+
+/* Mobile: Larger touch area */
+@media (max-width: 768px) {
+    .at-option label {
+        padding: 16px 14px;
+        min-height: 52px;
+        gap: 14px;
+        font-size: 15px;
+    }
 }
 
 .at-option label:hover {
@@ -229,6 +270,17 @@
     height: 17px;
     cursor: pointer;
     accent-color: rgba(255, 255, 255, 0.9);
+    /* Mobile touch optimization */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* Mobile: Larger checkboxes */
+@media (max-width: 768px) {
+    .at-option input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+    }
 }
 
 .at-option span {
@@ -474,6 +526,23 @@ body.quality-medium .floating-shape:nth-child(n+11) {
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    /* Mobile touch optimization */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    min-height: 48px;
+    min-width: 48px;
+}
+
+/* Mobile: Larger touch targets */
+@media (max-width: 768px) {
+    .season-btn {
+        font-size: 32px;
+        min-height: 56px;
+        min-width: 56px;
+        border-radius: 18px;
+    }
 }
 
 .season-btn:hover {
@@ -524,6 +593,29 @@ body.quality-medium .floating-shape:nth-child(n+11) {
     justify-content: center;
     gap: 6px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    /* Mobile touch optimization */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    min-height: 48px;
+}
+
+/* Mobile: Larger and more spaced */
+@media (max-width: 768px) {
+    .theme-select-btn {
+        padding: 16px 10px;
+        min-height: 60px;
+        gap: 8px;
+    }
+    
+    .theme-select-btn .theme-icon {
+        font-size: 30px !important;
+    }
+    
+    .theme-select-btn .theme-name {
+        font-size: 12px !important;
+    }
 }
 
 .theme-select-btn .theme-icon {
