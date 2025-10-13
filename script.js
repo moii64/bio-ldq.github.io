@@ -22,10 +22,10 @@ themeButtons.forEach(button => {
 });
 
 function applyTheme(theme) {
-    // Remove all theme classes
-    body.className = '';
+    // Remove all theme classes more explicitly
+    body.classList.remove('theme-glassmorphism', 'theme-neon', 'theme-minimal', 'theme-nature', 'theme-sunset');
     
-    // Add new theme class
+    // Add new theme class (gradient is default, no class needed)
     if (theme !== 'gradient') {
         body.classList.add(`theme-${theme}`);
     }
@@ -37,7 +37,18 @@ function applyTheme(theme) {
             btn.classList.add('active');
         }
     });
+    
+    // Save to localStorage
+    localStorage.setItem('bioTheme', theme);
+    
+    console.log(`🎨 Theme changed to: ${theme}`, {
+        classList: body.className,
+        hasClass: body.classList.contains(`theme-${theme}`)
+    });
 }
+
+// Make changeTheme available globally for AssistiveTouch
+window.changeTheme = applyTheme;
 
 // ==================== LINK ANIMATIONS ====================
 const linkCards = document.querySelectorAll('.link-card');

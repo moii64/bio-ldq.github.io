@@ -1,0 +1,26 @@
+/* ==================== HIDE SEASONAL & THEME PANELS ==================== */
+
+/* Hide the original seasonal control panel on the right side */
+.season-selector,
+.season-selector *,
+.seasonal-control,
+.seasonal-control * {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
+/* Hide theme selector buttons on top */
+.theme-selector,
+.theme-selector * {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+

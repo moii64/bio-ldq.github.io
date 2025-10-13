@@ -11,11 +11,19 @@ const SeasonalEffects = {
 
     // ==================== KHỞI TẠO ====================
     init() {
+        // Load saved settings from localStorage
+        this.loadSettings();
+        
         this.detectSeason();
         this.detectTimeOfDay();
         this.createSeasonSelector();
         
-        if (this.config.autoSwitch) {
+        // Apply saved season or auto-detect
+        const savedSeason = localStorage.getItem('selectedSeason');
+        if (savedSeason && savedSeason !== 'auto') {
+            this.applySeason(savedSeason);
+            this.config.autoSwitch = false;
+        } else if (this.config.autoSwitch) {
             this.applySeason(this.config.currentSeason);
         }
         
@@ -32,6 +40,26 @@ const SeasonalEffects = {
         }, 60000);
 
         console.log(`🌸 Season: ${this.config.currentSeason} | 🕐 Time: ${this.config.currentTimeTheme}`);
+    },
+
+    // Load settings from localStorage
+    loadSettings() {
+        const savedAutoTime = localStorage.getItem('autoTime');
+        if (savedAutoTime !== null) {
+            this.config.autoTime = savedAutoTime === 'true';
+        }
+        
+        const savedAutoSwitch = localStorage.getItem('autoSwitch');
+        if (savedAutoSwitch !== null) {
+            this.config.autoSwitch = savedAutoSwitch === 'true';
+        }
+    },
+
+    // Save settings to localStorage
+    saveSettings() {
+        localStorage.setItem('autoTime', this.config.autoTime);
+        localStorage.setItem('autoSwitch', this.config.autoSwitch);
+        console.log('💾 Settings saved');
     },
 
     // ==================== PHÁT HIỆN MÙA ====================
@@ -142,6 +170,29 @@ const SeasonalEffects = {
         });
 
         this.config.currentSeason = season;
+        
+        // Save to localStorage
+        localStorage.setItem('selectedSeason', season);
+        
+        console.log(`🌟 Seasonal effect changed to: ${season}`);
+    },
+
+    // Alias function for AssistiveTouch
+    changeSeason(season) {
+        this.config.autoSwitch = false; // Disable auto-switching when manually selected
+        this.applySeason(season);
+        this.saveSettings();
+    },
+
+    // Toggle auto time feature
+    toggleAutoTime(enabled) {
+        this.config.autoTime = enabled;
+        if (enabled) {
+            this.detectTimeOfDay();
+            this.applyTimeTheme(this.config.currentTimeTheme);
+        }
+        this.saveSettings();
+        console.log(`🕐 Auto time ${enabled ? 'enabled' : 'disabled'}`);
     },
 
     // XUÂN - HOA ANH ĐÀO RƠI
