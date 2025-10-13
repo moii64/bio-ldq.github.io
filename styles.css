@@ -136,6 +136,9 @@ body::before {
     height: 140px;
     margin: 0 auto 20px;
     animation: bounceIn 1s ease;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 @keyframes bounceIn {
@@ -162,9 +165,162 @@ body::before {
     transition: var(--transition);
 }
 
+/* Profile Image Overlay for Upload */
+.profile-img-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.profile-img-overlay i {
+    font-size: 28px;
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.profile-img-overlay span {
+    font-size: 12px;
+    color: white;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.profile-image:hover .profile-img-overlay {
+    opacity: 1;
+}
+
 .profile-image:hover img {
     transform: scale(1.05);
     border-color: var(--primary-color);
+}
+
+.profile-image:active img {
+    transform: scale(0.98);
+}
+
+/* Animation when changing image */
+.profile-image img.changing {
+    animation: imageChange 0.6s ease;
+}
+
+@keyframes imageChange {
+    0% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        opacity: 0;
+        transform: scale(0.8) rotate(180deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(360deg);
+    }
+}
+
+/* Profile Image Toast Notification */
+.profile-toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 100002;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.profile-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.profile-toast.profile-toast-error {
+    background: rgba(239, 68, 68, 0.9);
+}
+
+.profile-toast.profile-toast-success {
+    background: rgba(34, 197, 94, 0.9);
+}
+
+.profile-toast.profile-toast-loading {
+    background: rgba(59, 130, 246, 0.9);
+}
+
+/* Mobile: Better touch target and hint */
+@media (max-width: 768px) {
+    .profile-image {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .profile-image img {
+        border-width: 3px;
+    }
+    
+    .profile-img-overlay i {
+        font-size: 24px;
+    }
+    
+    .profile-img-overlay span {
+        font-size: 11px;
+    }
+    
+    /* Show hint on mobile */
+    .profile-image::after {
+        content: "Nhấp đúp hoặc giữ lâu";
+        position: absolute;
+        bottom: -24px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.6);
+        white-space: nowrap;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        animation: pulseHint 2s ease-in-out infinite;
+        pointer-events: none;
+    }
+    
+    @keyframes pulseHint {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+    }
+    
+    /* Hide hint after first interaction */
+    .profile-image.interacted::after {
+        display: none;
+    }
+    
+    .profile-toast {
+        top: 16px;
+        font-size: 13px;
+        padding: 10px 20px;
+        max-width: calc(100% - 32px);
+    }
 }
 
 .profile-ring {

@@ -106,19 +106,54 @@
     transform: scale(0.9) translateY(15px);
     pointer-events: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
     border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 25px;
 }
 
 /* Mobile: Full width menu with better spacing */
 @media (max-width: 768px) {
     .assistive-touch-menu {
-        left: 10px;
-        right: 10px;
-        bottom: 150px;
+        left: 12px;
+        right: 12px;
+        bottom: 200px;
         width: auto;
-        max-height: 70vh;
-        border-radius: 20px;
+        max-height: 60vh;
+        border-radius: 24px;
+        padding: 20px;
+        padding-bottom: 24px;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+}
+
+/* Custom scrollbar for menu */
+.assistive-touch-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.assistive-touch-menu::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.assistive-touch-menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.assistive-touch-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+    .assistive-touch-menu::-webkit-scrollbar {
+        width: 4px;
     }
 }
 
@@ -321,13 +356,22 @@
     border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Actions */
+/* Actions - Sticky at bottom */
 .at-actions {
     display: flex;
     gap: 10px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin: 20px -25px -25px -25px;
+    padding: 20px 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    position: sticky;
+    bottom: -25px;
+    left: -25px;
+    right: -25px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 0 0 25px 25px;
+    z-index: 10;
 }
 
 .at-btn {
@@ -390,14 +434,14 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .assistive-touch-btn {
-        width: 50px;
-        height: 50px;
-        right: 15px;
-        bottom: 80px;
+        width: 64px;
+        height: 64px;
+        right: 20px;
+        bottom: 120px;
     }
     
     .at-icon {
-        font-size: 20px;
+        font-size: 28px;
     }
     
     .assistive-touch-menu {
@@ -405,8 +449,12 @@
         left: 20px !important;
         right: 20px;
         top: auto !important;
-        bottom: 20px;
-        max-height: 70vh;
+        bottom: 200px;
+        max-height: 60vh;
+        padding: 20px;
+        padding-bottom: 24px;
+        border-radius: 24px;
+        overflow-y: auto !important;
     }
     
     .assistive-touch-menu.at-menu-open {
