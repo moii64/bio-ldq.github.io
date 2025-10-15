@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán ngân hàng - Lê Đức Quang</title>
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bio Link">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Thanh toán an toàn và bảo mật cho các sản phẩm và dịch vụ của Lê Đức Quang">
+    <meta name="keywords" content="thanh toán, ngân hàng, bảo mật, Lê Đức Quang, payment">
+    <meta name="author" content="Lê Đức Quang">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Thanh toán ngân hàng - Lê Đức Quang">
+    <meta property="og:description" content="Thanh toán an toàn và bảo mật cho các sản phẩm và dịch vụ">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-domain.com/payment.html">
+    <meta property="og:image" content="https://your-domain.com/payment-preview.jpg">
+    <meta property="og:site_name" content="Lê Đức Quang - Bio Link">
+
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Thanh toán ngân hàng - Lê Đức Quang">
+    <meta name="twitter:description" content="Thanh toán an toàn và bảo mật cho các sản phẩm và dịch vụ">
+    <meta name="twitter:image" content="https://your-domain.com/payment-preview.jpg">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "Thanh toán ngân hàng",
+            "description": "Trang thanh toán an toàn và bảo mật",
+            "url": "https://your-domain.com/payment.html",
+            "author": {
+                "@type": "Person",
+                "name": "Lê Đức Quang"
+            },
+            "publisher": {
+                "@type": "Organization",
+                "name": "Lê Đức Quang - Bio Link"
+            }
+        }
+    </script>
+
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="payment.css">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>Đang tải trang thanh toán...</p>
+    </div>
+
+    <!-- Payment Container -->
+    <div class="payment-container">
+        <!-- Header -->
+        <header class="payment-header">
+            <div class="header-content">
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Quay lại</span>
+                </a>
+                <h1>Thanh toán ngân hàng</h1>
+                <div class="security-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Bảo mật</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Payment Form -->
+        <main class="payment-main">
+            <!-- Order Summary -->
+            <section class="order-summary">
+                <h2><i class="fas fa-shopping-cart"></i> Tóm tắt đơn hàng</h2>
+                <div class="order-item">
+                    <div class="item-info">
+                        <h3 id="productName">Sản phẩm/Dịch vụ</h3>
+                        <p id="productDescription">Mô tả sản phẩm</p>
+                    </div>
+                    <div class="item-price">
+                        <span id="productPrice">0 VNĐ</span>
+                    </div>
+                </div>
+                <div class="order-total">
+                    <div class="total-row">
+                        <span>Tạm tính:</span>
+                        <span id="subtotal">0 VNĐ</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Phí xử lý:</span>
+                        <span id="processingFee">0 VNĐ</span>
+                    </div>
+                    <div class="total-row total-final">
+                        <span>Tổng cộng:</span>
+                        <span id="totalAmount">0 VNĐ</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payment Methods -->
+            <section class="payment-methods">
+                <h2><i class="fas fa-credit-card"></i> Phương thức thanh toán</h2>
+
+                <div class="method-tabs">
+                    <button class="method-tab active" data-method="bank">
+                        <i class="fas fa-university"></i>
+                        <span>Chuyển khoản ngân hàng</span>
+                    </button>
+                    <button class="method-tab" data-method="momo">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Ví MoMo</span>
+                    </button>
+                    <button class="method-tab" data-method="zalopay">
+                        <i class="fas fa-qrcode"></i>
+                        <span>ZaloPay</span>
+                    </button>
+                </div>
+
+                <!-- Bank Transfer Method -->
+                <div class="payment-method active" id="bank-method">
+                    <div class="bank-info">
+                        <h3>Thông tin chuyển khoản</h3>
+                        <div class="bank-details">
+                            <div class="bank-item">
+                                <label>Ngân hàng:</label>
+                                <span>Vietinbank (VTB)</span>
+                            </div>
+                            <div class="bank-item">
+                                <label>Số tài khoản:</label>
+                                <span class="copyable" data-copy="108880790155">
+                                    1088 8079 0155
+                                    <i class="fas fa-copy"></i>
+                                </span>
+                            </div>
+                            <div class="bank-item">
+                                <label>Chủ tài khoản:</label>
+                                <span>LE DUC QUANG</span>
+                            </div>
+                            <div class="bank-item">
+                                <label>Chi nhánh:</label>
+                                <span>Hồ Chí Minh</span>
+                            </div>
+                            <div class="bank-item">
+                                <label>Nội dung chuyển khoản:</label>
+                                <span class="copyable" data-copy="THANHTOAN [Mã đơn hàng]">
+                                    THANHTOAN <span id="orderCode">[Mã đơn hàng]</span>
+                                    <i class="fas fa-copy"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="qr-code">
+                        <h4>Hoặc quét mã QR</h4>
+                        <div class="qr-container">
+                            <img src="b6123c58-6d42-48a7-a3e2-1fef303056d7.jpg" alt="Vietinbank QR Code" id="bankQRImage">
+                            <div class="qr-amount-info" id="bankAmountInfo"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MoMo Method -->
+                <div class="payment-method" id="momo-method">
+                    <div class="momo-info">
+                        <h3>Thanh toán qua MoMo</h3>
+                        <div class="momo-details">
+                            <div class="momo-item">
+                                <label>Số điện thoại:</label>
+                                <span class="copyable" data-copy="0787215049">
+                                    0787 215 049
+                                    <i class="fas fa-copy"></i>
+                                </span>
+                            </div>
+                            <div class="momo-item">
+                                <label>Tên người nhận:</label>
+                                <span>LE DUC QUANG</span>
+                            </div>
+                        </div>
+                        <div class="momo-qr">
+                            <img src="a34855ac-133c-450b-a32e-839c43d7b67b.jpg" alt="MoMo QR Code" id="momoQRImage">
+                            <div class="qr-amount-info" id="momoAmountInfo"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ZaloPay Method -->
+                <div class="payment-method" id="zalopay-method">
+                    <div class="zalopay-info">
+                        <h3>Thanh toán qua ZaloPay</h3>
+                        <div class="zalopay-details">
+                            <div class="zalopay-item">
+                                <label>Mã ZaloPay:</label>
+                                <span class="copyable" data-copy="0787215049">
+                                    0787 215 049
+                                    <i class="fas fa-copy"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="zalopay-qr">
+                            <img src="a34855ac-133c-450b-a32e-839c43d7b67b.jpg" alt="ZaloPay QR" id="zalopayQRImage">
+                            <div class="qr-amount-info" id="zalopayAmountInfo"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payment Instructions -->
+            <section class="payment-instructions">
+                <h2><i class="fas fa-info-circle"></i> Hướng dẫn thanh toán</h2>
+                <div class="instructions-list">
+                    <div class="instruction-item">
+                        <span class="step-number">1</span>
+                        <p>Chọn phương thức thanh toán phù hợp</p>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="step-number">2</span>
+                        <p>Chuyển khoản đúng số tiền và nội dung</p>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="step-number">3</span>
+                        <p>Chụp ảnh biên lai và gửi qua Zalo/Facebook</p>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="step-number">4</span>
+                        <p>Chúng tôi sẽ xác nhận trong vòng 5-10 phút</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Info -->
+            <section class="contact-info">
+                <h2><i class="fas fa-headset"></i> Hỗ trợ thanh toán</h2>
+                <div class="contact-methods">
+                    <a href="https://zalo.me/0787215049" class="contact-item">
+                        <i class="fab fa-telegram-plane"></i>
+                        <span>Zalo: 0787.215.049</span>
+                    </a>
+                    <a href="https://m.me/lailatone" class="contact-item">
+                        <i class="fab fa-facebook-messenger"></i>
+                        <span>Messenger: Lê Đức Quang</span>
+                    </a>
+                    <a href="tel:0901234567" class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <span>Hotline: 0787.215.049</span>
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="payment-footer">
+            <div class="footer-content">
+                <div class="security-features">
+                    <div class="security-item">
+                        <i class="fas fa-lock"></i>
+                        <span>Mã hóa SSL</span>
+                    </div>
+                    <div class="security-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Bảo mật cao</span>
+                    </div>
+                    <div class="security-item">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Bảo vệ thông tin</span>
+                    </div>
+                </div>
+                <p>&copy; 2024 Lê Đức Quang. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script src="payment.js"></script>
+
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('✅ Service Worker registered'))
+                    .catch(error => console.log('❌ Service Worker registration failed'));
+            });
+        }
+    </script>
+</body>
+
+</html>
