@@ -65,7 +65,7 @@ class PaymentHandler {
 
     updatePaymentAmounts() {
         // Check for discount codes
-        const discountCode = this.getDiscountCode();
+        const discountCode = 20000;
         let price = 20000;
         let discountAmount = 0;
         let finalPrice = price;
