@@ -126,11 +126,29 @@
                     </div>
                     <div class="total-row">
                         <span>Phí xử lý:</span>
-                        <span id="processingFee">0 VNĐ</span>
+                        <span id="processingFee">0đ</span>
                     </div>
+
+                    <!-- Discount Code Form -->
+                    <div class="discount-form">
+                        <div class="form-group">
+                            <label for="discountCode">Mã giảm giá:</label>
+                            <div class="input-group">
+                                <input type="text" id="discountCode" placeholder="Nhập mã giảm giá..." maxlength="20">
+                                <button type="button" id="applyDiscount" class="apply-btn">
+                                    <i class="fas fa-check"></i> Áp dụng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="discount-info" class="discount-info" style="display: none;">
+                        <!-- Discount information will be inserted here -->
+                    </div>
+
                     <div class="total-row total-final">
                         <span>Tổng cộng:</span>
-                        <span id="totalAmount">0 VNĐ</span>
+                        <span id="totalAmount">20,000 VNĐ</span>
                     </div>
                 </div>
             </section>

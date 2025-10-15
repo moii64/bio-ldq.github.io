@@ -64,17 +64,133 @@ class PaymentHandler {
     }
 
     updatePaymentAmounts() {
+        // Check for discount codes
+        const discountCode = this.getDiscountCode();
+        let price = 20000;
+        let discountAmount = 0;
+        let finalPrice = price;
 
-        const price = this.orderData && this.orderData.price || 0;
-        const processingFee = Math.round(price * 0.03); // 3% processing fee
-        const total = price + processingFee;
+        if (discountCode) {
+            const discount = this.applyDiscount(discountCode, price);
+            if (discount) {
+                discountAmount = discount.amount;
+                finalPrice = discount.finalPrice;
+            }
+        }
 
+        const processingFee = 0; // No processing fee
+        const total = finalPrice;
+
+        // Update display
         document.getElementById('subtotal').textContent = this.formatCurrency(price);
-        document.getElementById('processingFee').textContent = this.formatCurrency(processingFee);
+        document.getElementById('processingFee').textContent = '0đ';
         document.getElementById('totalAmount').textContent = this.formatCurrency(total);
+
+        // Show discount info if applicable
+        this.updateDiscountDisplay(discountCode, discountAmount, finalPrice);
 
         // Update QR codes with actual amount
         this.updateQRCodes(total);
+    }
+
+    getDiscountCode() {
+        // Check URL parameters for discount code
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('discount') || urlParams.get('code');
+    }
+
+    applyDiscount(code, originalPrice) {
+        const discounts = {
+            'VIP2024': {
+                amount: 5000,
+                type: 'fixed',
+                description: 'Giảm 5,000đ'
+            },
+            'SPECIAL50': {
+                amount: 10000,
+                type: 'fixed',
+                description: 'Giảm 10,000đ'
+            },
+            'MASTER100': {
+                amount: 5000,
+                type: 'fixed',
+                description: 'Giảm 5,000đ'
+            },
+            'PREMIUM75': {
+                amount: 10000,
+                type: 'fixed',
+                description: 'Giảm 10,000đ'
+            },
+            'ELITE90': {
+                amount: 5000,
+                type: 'fixed',
+                description: 'Giảm 5,000đ'
+            }
+        };
+
+        const discount = discounts[code];
+        if (!discount) return null;
+
+        const finalPrice = Math.max(0, originalPrice - discount.amount);
+
+        return {
+            code: code,
+            amount: discount.amount,
+            finalPrice: finalPrice,
+            description: discount.description
+        };
+    }
+
+    updateDiscountDisplay(code, discountAmount, finalPrice) {
+        const discountContainer = document.getElementById('discount-info');
+        const discountInput = document.getElementById('discountCode');
+
+        if (!discountContainer) return;
+
+        if (code && discountAmount > 0) {
+            discountContainer.innerHTML = `
+                <div class="discount-item">
+                    <span class="discount-label">Mã giảm giá:</span>
+                    <span class="discount-code">${code}</span>
+                </div>
+                <div class="discount-item">
+                    <span class="discount-label">Giảm giá:</span>
+                    <span class="discount-amount">-${this.formatCurrency(discountAmount)}</span>
+                </div>
+            `;
+            discountContainer.style.display = 'block';
+
+            // Update input field
+            if (discountInput) {
+                discountInput.value = code;
+            }
+        } else {
+            discountContainer.style.display = 'none';
+
+            // Clear input field
+            if (discountInput) {
+                discountInput.value = '';
+            }
+        }
+    }
+
+    removeDiscount() {
+        // Clear URL parameter
+        const url = new URL(window.location);
+        url.searchParams.delete('discount');
+        window.history.replaceState({}, '', url);
+
+        // Clear input
+        const discountInput = document.getElementById('discountCode');
+        if (discountInput) {
+            discountInput.value = '';
+        }
+
+        // Update payment amounts
+        this.updatePaymentAmounts();
+
+        // Show toast for manual removal
+        this.showToast('Đã xóa mã giảm giá', 'info');
     }
 
     updateQRCodes(amount) {
@@ -148,8 +264,100 @@ class PaymentHandler {
             });
         });
 
+        // Discount form
+        this.setupDiscountForm();
+
         // Contact links
         this.setupContactLinks();
+    }
+
+    setupDiscountForm() {
+        const discountInput = document.getElementById('discountCode');
+        const applyBtn = document.getElementById('applyDiscount');
+
+        if (!discountInput || !applyBtn) return;
+
+        // Apply discount on button click
+        applyBtn.addEventListener('click', () => {
+            this.applyDiscountCode();
+        });
+
+        // Apply discount on Enter key
+        discountInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.applyDiscountCode();
+            }
+        });
+
+        // Clear discount info when typing new code
+        discountInput.addEventListener('input', () => {
+            const discountInfo = document.getElementById('discount-info');
+            if (discountInfo && discountInfo.style.display !== 'none') {
+                discountInfo.style.display = 'none';
+                // Don't update payment amounts here, wait for apply
+            }
+        });
+
+        // Clear discount when input is empty and user leaves field
+        discountInput.addEventListener('blur', () => {
+            const code = discountInput.value.trim();
+            if (!code) {
+                this.removeDiscount();
+            }
+        });
+
+        // Allow manual input and clear
+        discountInput.addEventListener('keydown', (e) => {
+            // Allow all normal input (letters, numbers, backspace, delete, etc.)
+            if (e.key === 'Escape') {
+                // Clear on Escape key
+                discountInput.value = '';
+                this.removeDiscount();
+            }
+        });
+    }
+
+    applyDiscountCode() {
+        const discountInput = document.getElementById('discountCode');
+        const applyBtn = document.getElementById('applyDiscount');
+
+        if (!discountInput || !applyBtn) return;
+
+        const code = discountInput.value.trim().toUpperCase();
+
+        if (!code) {
+            this.showToast('Vui lòng nhập mã giảm giá', 'error');
+            return;
+        }
+
+        // Disable button during processing
+        applyBtn.disabled = true;
+        applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+
+        // Simulate processing delay
+        setTimeout(() => {
+            const discount = this.applyDiscount(code, 20000);
+
+            if (discount) {
+                // Update URL with discount code
+                const url = new URL(window.location);
+                url.searchParams.set('discount', code);
+                window.history.replaceState({}, '', url);
+
+                // Update payment amounts
+                this.updatePaymentAmounts();
+
+                this.showToast(`Áp dụng mã ${code} thành công!`, 'success');
+            } else {
+                this.showToast('Mã giảm giá không hợp lệ', 'error');
+                // Clear input on invalid code
+                discountInput.value = '';
+            }
+
+            // Re-enable button
+            applyBtn.disabled = false;
+            applyBtn.innerHTML = '<i class="fas fa-check"></i> Áp dụng';
+        }, 1000);
     }
 
     switchPaymentMethod(method) {
@@ -275,4 +483,5 @@ if (document.readyState === 'loading') {
 }
 
 // Export for use in other scripts
+window.PaymentHandler = PaymentHandler;
 window.PaymentHandler = PaymentHandler;
