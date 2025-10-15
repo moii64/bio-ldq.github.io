@@ -41,7 +41,7 @@ class PaymentHandler {
         // Update product info
         document.getElementById('productName').textContent = productName;
         document.getElementById('productDescription').textContent = productDescription;
-        document.getElementById('productPrice').textContent = this.formatCurrency(price);
+        document.getElementById('productPrice').textContent = this.formatCurrency(20000); // Fixed price
         document.getElementById('orderCode').textContent = code;
 
         // Store order data
@@ -65,7 +65,7 @@ class PaymentHandler {
 
     updatePaymentAmounts() {
         // Check for discount codes
-        const discountCode = 20000;
+        const discountCode = this.getDiscountCode();
         let price = 20000;
         let discountAmount = 0;
         let finalPrice = price;
