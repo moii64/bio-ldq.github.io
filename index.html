@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bio Link - Danh sách nhiệm vụ</title>
+    <meta name="description" content="Trang bio link hiện đại với danh sách nhiệm vụ và chuyển đổi giao diện">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Main styles -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assistive-touch.css">
+    <link rel="stylesheet" href="hide-seasonal-panel.css">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Theme color -->
+    <meta name="theme-color" content="#6366f1">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Bio Link - Danh sách nhiệm vụ">
+    <meta property="og:description" content="Trang bio link hiện đại với danh sách nhiệm vụ và chuyển đổi giao diện">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://via.placeholder.com/1200x630/6366f1/ffffff?text=Bio+Link">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Bio Link - Danh sách nhiệm vụ">
+    <meta name="twitter:description" content="Trang bio link hiện đại với danh sách nhiệm vụ và chuyển đổi giao diện">
+</head>
+
+<body>
+    <!-- Theme Selector -->
+    <div class="theme-selector">
+        <button class="theme-btn active" data-theme="gradient" title="Gradient Theme">
+            <i class="fas fa-palette"></i>
+        </button>
+        <button class="theme-btn" data-theme="glassmorphism" title="Glassmorphism Theme">
+            <i class="fas fa-glass-whiskey"></i>
+        </button>
+        <button class="theme-btn" data-theme="neon" title="Neon Theme">
+            <i class="fas fa-bolt"></i>
+        </button>
+        <button class="theme-btn" data-theme="minimal" title="Minimal Theme">
+            <i class="fas fa-circle"></i>
+        </button>
+        <button class="theme-btn" data-theme="nature" title="Nature Theme">
+            <i class="fas fa-leaf"></i>
+        </button>
+        <button class="theme-btn" data-theme="sunset" title="Sunset Theme">
+            <i class="fas fa-sun"></i>
+        </button>
+    </div>
+
+    <div class="container">
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-image" id="profileImage">
+                <img src="https://via.placeholder.com/140x140/6366f1/ffffff?text=👤" alt="Profile" id="profileImg">
+                <div class="profile-img-overlay">
+                    <i class="fas fa-camera"></i>
+                    <span>Thay đổi ảnh</span>
+                </div>
+            </div>
+            <h1 class="profile-name">Tên của bạn</h1>
+            <p class="profile-bio">Mô tả ngắn gọn về bản thân và mục tiêu của bạn</p>
+        </div>
+
+        <!-- Social Links -->
+        <div class="social-links">
+            <a href="#" class="social-icon" title="Facebook">
+                <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#" class="social-icon" title="Instagram">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="social-icon" title="Twitter">
+                <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="social-icon" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+            </a>
+            <a href="#" class="social-icon" title="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+        </div>
+
+        <!-- Task List Section -->
+        <div class="task-section">
+            <div class="task-header">
+                <h2><i class="fas fa-tasks"></i> Danh sách nhiệm vụ</h2>
+                <button class="add-task-btn" id="addTaskBtn">
+                    <i class="fas fa-plus"></i>
+                    Thêm nhiệm vụ
+                </button>
+            </div>
+
+            <div class="task-filters">
+                <button class="filter-btn active" data-filter="all">Tất cả</button>
+                <button class="filter-btn" data-filter="pending">Chưa hoàn thành</button>
+                <button class="filter-btn" data-filter="completed">Đã hoàn thành</button>
+            </div>
+
+            <div class="task-list" id="taskList">
+                <!-- Tasks will be dynamically added here -->
+            </div>
+
+            <div class="task-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalTasks">0</span>
+                    <span class="stat-label">Tổng cộng</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="completedTasks">0</span>
+                    <span class="stat-label">Hoàn thành</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="pendingTasks">0</span>
+                    <span class="stat-label">Chưa xong</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Links Container -->
+        <div class="links-container">
+            <a href="#" class="link-card special">
+                <div class="link-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="link-content">
+                    <span class="link-title">Liên kết đặc biệt</span>
+                    <span class="link-subtitle">Mô tả ngắn gọn</span>
+                </div>
+                <div class="link-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="#" class="link-card">
+                <div class="link-icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <div class="link-content">
+                    <span class="link-title">Website chính</span>
+                    <span class="link-subtitle">Khám phá thêm về tôi</span>
+                </div>
+                <div class="link-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="#" class="link-card">
+                <div class="link-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="link-content">
+                    <span class="link-title">Liên hệ</span>
+                    <span class="link-subtitle">Gửi email cho tôi</span>
+                </div>
+                <div class="link-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="#" class="link-card">
+                <div class="link-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="link-content">
+                    <span class="link-title">CV/Resume</span>
+                    <span class="link-subtitle">Tải xuống CV của tôi</span>
+                </div>
+                <div class="link-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Được tạo với <i class="fas fa-heart"></i> và <i class="fas fa-coffee"></i></p>
+            <p class="footer-small">© 2024 Bio Link. Tất cả quyền được bảo lưu.</p>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="task-modal" id="taskModal">
+        <div class="task-modal-content">
+            <div class="task-modal-header">
+                <h3 id="modalTitle">Thêm nhiệm vụ mới</h3>
+                <button class="close-btn" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="task-modal-body">
+                <form id="taskForm">
+                    <div class="form-group">
+                        <label for="taskTitle">Tiêu đề nhiệm vụ *</label>
+                        <input type="text" id="taskTitle" name="title" required placeholder="Nhập tiêu đề nhiệm vụ...">
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDescription">Mô tả</label>
+                        <textarea id="taskDescription" name="description" placeholder="Mô tả chi tiết nhiệm vụ..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskPriority">Độ ưu tiên</label>
+                        <select id="taskPriority" name="priority">
+                            <option value="low">Thấp</option>
+                            <option value="medium" selected>Trung bình</option>
+                            <option value="high">Cao</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDueDate">Hạn hoàn thành</label>
+                        <input type="date" id="taskDueDate" name="dueDate">
+                    </div>
+                </form>
+            </div>
+            <div class="task-modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelTask">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveTask">Lưu nhiệm vụ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Image Upload Modal -->
+    <div class="crop-modal" id="cropModal">
+        <div class="crop-modal-content">
+            <div class="crop-modal-header">
+                <h2><i class="fas fa-crop"></i> Cắt ảnh đại diện</h2>
+                <button class="crop-close-btn" id="cropCloseBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="crop-modal-body">
+                <div class="crop-loading" id="cropLoading">
+                    <div class="crop-spinner"></div>
+                    <p>Đang tải ảnh...</p>
+                </div>
+                <div class="crop-container" id="cropContainer" style="display: none;">
+                    <img id="cropImage" alt="Crop Image">
+                </div>
+            </div>
+            <div class="crop-modal-footer" id="cropFooter" style="display: none;">
+                <button class="crop-btn crop-btn-secondary" id="cropCancel">Hủy</button>
+                <button class="crop-btn crop-btn-primary" id="cropConfirm">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Toast Notification -->
+    <div class="profile-toast" id="profileToast"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script src="script.js"></script>
+    <script src="profile-image.js"></script>
+    <script src="assistive-touch.js"></script>
+    <script src="seasonal-effects.js"></script>
+    <script src="mobile-3d-tilt.js"></script>
+    <script src="effects.js"></script>
+    <script src="widgets.js"></script>
+    <script src="service-worker.js"></script>
+
+    <!-- Task Management Script -->
+    <script>
+        // Task Management System
+        class TaskManager {
+            constructor() {
+                this.tasks = JSON.parse(localStorage.getItem('bioLinkTasks')) || [];
+                this.currentFilter = 'all';
+                this.editingTaskId = null;
+
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.renderTasks();
+                this.updateStats();
+            }
+
+            bindEvents() {
+                // Add task button
+                document.getElementById('addTaskBtn').addEventListener('click', () => this.showTaskModal());
+
+                // Filter buttons
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.setFilter(e.target.dataset.filter));
+                });
+
+                // Modal events
+                document.getElementById('closeModal').addEventListener('click', () => this.hideTaskModal());
+                document.getElementById('cancelTask').addEventListener('click', () => this.hideTaskModal());
+                document.getElementById('saveTask').addEventListener('click', () => this.saveTask());
+
+                // Close modal on outside click
+                document.getElementById('taskModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'taskModal') this.hideTaskModal();
+                });
+            }
+
+            showTaskModal(taskId = null) {
+                this.editingTaskId = taskId;
+                const modal = document.getElementById('taskModal');
+                const form = document.getElementById('taskForm');
+                const title = document.getElementById('modalTitle');
+
+                if (taskId) {
+                    const task = this.tasks.find(t => t.id === taskId);
+                    title.textContent = 'Chỉnh sửa nhiệm vụ';
+                    form.title.value = task.title;
+                    form.description.value = task.description || '';
+                    form.priority.value = task.priority;
+                    form.dueDate.value = task.dueDate || '';
+                } else {
+                    title.textContent = 'Thêm nhiệm vụ mới';
+                    form.reset();
+                }
+
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+
+            hideTaskModal() {
+                const modal = document.getElementById('taskModal');
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+                this.editingTaskId = null;
+            }
+
+            saveTask() {
+                const form = document.getElementById('taskForm');
+                const formData = new FormData(form);
+
+                const taskData = {
+                    title: formData.get('title'),
+                    description: formData.get('description'),
+                    priority: formData.get('priority'),
+                    dueDate: formData.get('dueDate'),
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+
+                if (!taskData.title.trim()) {
+                    alert('Vui lòng nhập tiêu đề nhiệm vụ!');
+                    return;
+                }
+
+                if (this.editingTaskId) {
+                    // Update existing task
+                    const index = this.tasks.findIndex(t => t.id === this.editingTaskId);
+                    this.tasks[index] = {
+                        ...this.tasks[index],
+                        ...taskData
+                    };
+                } else {
+                    // Add new task
+                    taskData.id = Date.now().toString();
+                    this.tasks.unshift(taskData);
+                }
+
+                this.saveTasks();
+                this.renderTasks();
+                this.updateStats();
+                this.hideTaskModal();
+            }
+
+            deleteTask(taskId) {
+                if (confirm('Bạn có chắc chắn muốn xóa nhiệm vụ này?')) {
+                    this.tasks = this.tasks.filter(t => t.id !== taskId);
+                    this.saveTasks();
+                    this.renderTasks();
+                    this.updateStats();
+                }
+            }
+
+            toggleTask(taskId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.completed = !task.completed;
+                    task.completedAt = task.completed ? new Date().toISOString() : null;
+                    this.saveTasks();
+                    this.renderTasks();
+                    this.updateStats();
+                }
+            }
+
+            editTask(taskId) {
+                this.showTaskModal(taskId);
+            }
+
+            setFilter(filter) {
+                this.currentFilter = filter;
+
+                // Update filter buttons
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.filter === filter) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                this.renderTasks();
+            }
+
+            getFilteredTasks() {
+                switch (this.currentFilter) {
+                    case 'completed':
+                        return this.tasks.filter(t => t.completed);
+                    case 'pending':
+                        return this.tasks.filter(t => !t.completed);
+                    default:
+                        return this.tasks;
+                }
+            }
+
+            renderTasks() {
+                const taskList = document.getElementById('taskList');
+                const filteredTasks = this.getFilteredTasks();
+
+                if (filteredTasks.length === 0) {
+                    taskList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <p>${this.currentFilter === 'all' ? 'Chưa có nhiệm vụ nào' : 
+                               this.currentFilter === 'completed' ? 'Chưa có nhiệm vụ hoàn thành' : 
+                               'Chưa có nhiệm vụ chưa hoàn thành'}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                taskList.innerHTML = filteredTasks.map(task => `
+                    <div class="task-item ${task.completed ? 'completed' : ''} priority-${task.priority}">
+                        <div class="task-checkbox">
+                            <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                                   onchange="taskManager.toggleTask('${task.id}')">
+                        </div>
+                        <div class="task-content">
+                            <h4 class="task-title">${this.escapeHtml(task.title)}</h4>
+                            ${task.description ? `<p class="task-description">${this.escapeHtml(task.description)}</p>` : ''}
+                            <div class="task-meta">
+                                <span class="task-priority priority-${task.priority}">
+                                    <i class="fas fa-flag"></i>
+                                    ${this.getPriorityText(task.priority)}
+                                </span>
+                                ${task.dueDate ? `<span class="task-due-date">
+                                    <i class="fas fa-calendar"></i>
+                                    ${this.formatDate(task.dueDate)}
+                                </span>` : ''}
+                                <span class="task-created">
+                                    <i class="fas fa-clock"></i>
+                                    ${this.formatDate(task.createdAt)}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="task-action-btn edit-btn" onclick="taskManager.editTask('${task.id}')" title="Chỉnh sửa">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="task-action-btn delete-btn" onclick="taskManager.deleteTask('${task.id}')" title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateStats() {
+                const total = this.tasks.length;
+                const completed = this.tasks.filter(t => t.completed).length;
+                const pending = total - completed;
+
+                document.getElementById('totalTasks').textContent = total;
+                document.getElementById('completedTasks').textContent = completed;
+                document.getElementById('pendingTasks').textContent = pending;
+            }
+
+            saveTasks() {
+                localStorage.setItem('bioLinkTasks', JSON.stringify(this.tasks));
+            }
+
+            getPriorityText(priority) {
+                const priorities = {
+                    low: 'Thấp',
+                    medium: 'Trung bình',
+                    high: 'Cao'
+                };
+                return priorities[priority] || 'Trung bình';
+            }
+
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Initialize task manager when DOM is loaded
+        let taskManager;
+        document.addEventListener('DOMContentLoaded', () => {
+            taskManager = new TaskManager();
+        });
+    </script>
+
+    <!-- Task List Styles -->
+    <style>
+        /* Task Section Styles */
+        .task-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .task-header h2 {
+            color: var(--text-color);
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .add-task-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .add-task-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .task-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .task-item {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .task-item.completed {
+            opacity: 0.7;
+        }
+
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+        }
+
+        .task-checkbox {
+            margin-top: 2px;
+        }
+
+        .task-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .task-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-title {
+            color: var(--text-color);
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            line-height: 1.4;
+        }
+
+        .task-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin: 0 0 12px 0;
+            line-height: 1.5;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 12px;
+        }
+
+        .task-priority {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .task-priority.priority-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .task-priority.priority-medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+        }
+
+        .task-priority.priority-low {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+        }
+
+        .task-due-date,
+        .task-created {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .task-item:hover .task-actions {
+            opacity: 1;
+        }
+
+        .task-action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 12px;
+        }
+
+        .edit-btn {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+        }
+
+        .edit-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .delete-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: scale(1.1);
+        }
+
+        .task-stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        /* Task Modal Styles */
+        .task-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .task-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .task-modal-content {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideInUp 0.4s ease;
+        }
+
+        .task-modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .task-modal-header h3 {
+            color: var(--text-color);
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        .task-modal-body {
+            padding: 25px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-color);
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .task-modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            min-width: 100px;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .task-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .task-header h2 {
+                font-size: 20px;
+            }
+
+            .add-task-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .task-filters {
+                justify-content: center;
+            }
+
+            .task-item {
+                padding: 15px;
+            }
+
+            .task-actions {
+                opacity: 1;
+            }
+
+            .task-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .task-modal-content {
+                width: 95%;
+                margin: 10px;
+            }
+
+            .task-modal-header {
+                padding: 15px 20px;
+            }
+
+            .task-modal-body {
+                padding: 20px;
+            }
+
+            .task-modal-footer {
+                padding: 15px 20px;
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+
+</html>

@@ -1,0 +1,67 @@
+{
+  "name": "Lê Đức Quang - Bio Link",
+  "short_name": "Bio Link",
+  "description": "✨ Content Creator | Developer | Designer. Kết nối với tôi qua các mạng xã hội.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%236366f1' rx='20'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='120' fill='white'>🔗</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%236366f1' rx='50'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='320' fill='white'>🔗</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["social", "lifestyle", "productivity"],
+  "screenshots": [
+    {
+      "src": "https://scontent-syd2-1.xx.fbcdn.net/v/t39.30808-6/453168188_1029364998621239_5464512553069020285_n.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Portfolio",
+      "short_name": "Portfolio",
+      "description": "Xem portfolio của tôi",
+      "url": "/#portfolio",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><text y='.9em' font-size='80'>💼</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Liên hệ",
+      "short_name": "Contact",
+      "description": "Gửi email cho tôi",
+      "url": "/#contact",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><text y='.9em' font-size='80'>✉️</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "lang": "vi",
+  "dir": "ltr",
+  "iarc_rating_id": ""
+}
+
