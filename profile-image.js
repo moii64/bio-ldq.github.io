@@ -12,7 +12,9 @@ class ProfileImageUploader {
         this.cropModal = document.getElementById('cropModal');
         this.cropImage = document.getElementById('cropImage');
         this.cropLoading = document.getElementById('cropLoading');
-        this.saveCropBtn = document.getElementById('saveCropBtn');
+        this.cropContainer = document.getElementById('cropContainer');
+        this.cropFooter = document.getElementById('cropFooter');
+        this.saveCropBtn = document.getElementById('cropConfirm');
 
         if (!this.imageElement || !this.inputElement || !this.wrapper) {
             console.warn('Profile image elements not found');
@@ -315,10 +317,11 @@ class ProfileImageUploader {
         this.cropModal.style.display = 'flex';
         this.cropModal.classList.add('show');
 
-        // Show loading
+        // Show loading, hide container and footer
         this.cropLoading.style.display = 'block';
-        this.cropImage.style.display = 'none';
-        this.saveCropBtn.disabled = true;
+        if (this.cropContainer) this.cropContainer.style.display = 'none';
+        if (this.cropFooter) this.cropFooter.style.display = 'none';
+        if (this.saveCropBtn) this.saveCropBtn.disabled = true;
 
         // Set image source
         this.cropImage.src = imageSrc;
@@ -326,7 +329,8 @@ class ProfileImageUploader {
         // Initialize cropper when image loads
         this.cropImage.onload = () => {
             this.cropLoading.style.display = 'none';
-            this.cropImage.style.display = 'block';
+            if (this.cropContainer) this.cropContainer.style.display = 'block';
+            if (this.cropFooter) this.cropFooter.style.display = 'flex';
 
             // Destroy existing cropper
             if (this.cropper) {
@@ -355,20 +359,22 @@ class ProfileImageUploader {
                 minCropBoxWidth: 100,
                 minCropBoxHeight: 100,
                 ready: () => {
-                    this.saveCropBtn.disabled = false;
+                    if (this.saveCropBtn) this.saveCropBtn.disabled = false;
                     console.log('✅ Cropper initialized');
                 },
                 cropstart: () => {
-                    this.saveCropBtn.disabled = false;
+                    if (this.saveCropBtn) this.saveCropBtn.disabled = false;
                 },
                 cropmove: () => {
-                    this.saveCropBtn.disabled = false;
+                    if (this.saveCropBtn) this.saveCropBtn.disabled = false;
                 }
             });
         };
 
         this.cropImage.onerror = () => {
             this.cropLoading.style.display = 'none';
+            if (this.cropContainer) this.cropContainer.style.display = 'none';
+            if (this.cropFooter) this.cropFooter.style.display = 'none';
             this.showNotification('Không thể tải ảnh!', 'error');
             this.closeCropModal();
         };
@@ -393,8 +399,9 @@ class ProfileImageUploader {
 
         // Reset modal state
         this.cropLoading.style.display = 'block';
-        this.cropImage.style.display = 'none';
-        this.saveCropBtn.disabled = true;
+        if (this.cropContainer) this.cropContainer.style.display = 'none';
+        if (this.cropFooter) this.cropFooter.style.display = 'none';
+        if (this.saveCropBtn) this.saveCropBtn.disabled = true;
     }
 
     saveCroppedImage() {
