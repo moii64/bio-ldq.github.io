@@ -331,6 +331,42 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
+// ==================== INITIALIZE WIDGETS ====================
+// Initialize widgets when page loads
+window.addEventListener('load', () => {
+    // Wait a bit for all scripts to load
+    setTimeout(() => {
+        if (window.Widgets) {
+            // Initialize visitor counter
+            try {
+                Widgets.createVisitorCounter();
+            } catch (e) {
+                console.warn('Could not create visitor counter:', e);
+            }
+            
+            // Initialize QR code widget
+            try {
+                Widgets.createQRWidget();
+            } catch (e) {
+                console.warn('Could not create QR widget:', e);
+            }
+            
+            // Initialize share widget
+            try {
+                Widgets.createShareWidget();
+            } catch (e) {
+                console.warn('Could not create share widget:', e);
+            }
+            
+            // Uncomment to enable stats widget
+            // Widgets.createStatsWidget();
+            
+            // Uncomment to enable music player (provide audio URL)
+            // Widgets.createMusicPlayer('path/to/audio.mp3', 'Song Title');
+        }
+    }, 500);
+});
+
 // ==================== WELCOME MESSAGE ====================
 console.log(`
 ╔═══════════════════════════════════════╗
