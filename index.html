@@ -13,6 +13,9 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- CropperJS CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha512-hvLV0+y52jz63jJVPgDYlBdp3T8aVPGJWh+CkrVd031Lo54kf9AoURU0VFFy4iQ5D9rRcFyWfXaJF5eS0mum8w==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
     <!-- Main styles -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="assistive-touch.css">
@@ -250,16 +253,19 @@
             </div>
             <div class="crop-modal-footer" id="cropFooter" style="display: none;">
                 <button class="crop-btn crop-btn-secondary" id="cropCancel">Hủy</button>
-                <button class="crop-btn crop-btn-primary" id="cropConfirm">Xác nhận</button>
+                <button class="crop-btn crop-btn-primary" id="cropConfirm">Lưu thay đổi</button>
             </div>
         </div>
     </div>
+
+    <!-- Hidden file input for image upload -->
+    <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
 
     <!-- Profile Toast Notification -->
     <div class="profile-toast" id="profileToast"></div>
 
     <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B8k8R3tDTM7/OJdGIf8Nw0AC6LrK6EoFJ8yTp3JMWMUpPk9S4VrDtCInzaY5bq5Z4b5ZY1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="script.js"></script>
     <script src="profile-image.js"></script>
     <script src="assistive-touch.js"></script>
@@ -517,6 +523,27 @@
         let taskManager;
         document.addEventListener('DOMContentLoaded', () => {
             taskManager = new TaskManager();
+
+            // Initialize crop modal event listeners
+            const closeBtn = document.getElementById('cropCloseBtn');
+            const cancelBtn = document.getElementById('cropCancel');
+            const confirmBtn = document.getElementById('cropConfirm');
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    if (window.closeCropModal) window.closeCropModal();
+                });
+            }
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => {
+                    if (window.closeCropModal) window.closeCropModal();
+                });
+            }
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', () => {
+                    if (window.saveCroppedImage) window.saveCroppedImage();
+                });
+            }
         });
     </script>
 
@@ -1003,6 +1030,226 @@
 
             .btn {
                 width: 100%;
+            }
+        }
+
+        /* Crop Modal Styles */
+        .crop-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .crop-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .crop-modal-content {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideInUp 0.4s ease;
+        }
+
+        .crop-modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .crop-modal-header h2 {
+            color: var(--text-color);
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .crop-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .crop-close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        .crop-modal-body {
+            padding: 25px;
+            max-height: 60vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .crop-loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-color);
+        }
+
+        .crop-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .crop-container {
+            position: relative;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .crop-container img {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 10px;
+        }
+
+        .crop-modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .crop-btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .crop-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .crop-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .crop-btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .crop-btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+        }
+
+        .crop-btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Mobile optimizations for crop modal */
+        @media (max-width: 768px) {
+            .crop-modal-content {
+                width: 95%;
+                max-height: 95vh;
+                margin: 10px;
+            }
+
+            .crop-modal-header {
+                padding: 15px 20px;
+            }
+
+            .crop-modal-header h2 {
+                font-size: 18px;
+            }
+
+            .crop-modal-body {
+                padding: 20px;
+                max-height: 50vh;
+            }
+
+            .crop-container {
+                min-height: 300px;
+            }
+
+            .crop-modal-footer {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .crop-btn {
+                width: 100%;
+                min-width: auto;
             }
         }
     </style>
