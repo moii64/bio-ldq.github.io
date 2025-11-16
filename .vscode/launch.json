@@ -1,0 +1,96 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}"
+            ],
+            "name": "Launch Extension",
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "preLaunchTask": "npm",
+            "request": "launch",
+            "type": "extensionHost"
+        },
+        {
+            "name": "Launch currently open script with Xdebug 2 (Legacy)",
+            "type": "php",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${fileDirname}",
+            "port": 0,
+            "runtimeArgs": [
+                "-dxdebug.remote_enable=yes",
+                "-dxdebug.remote_autostart=yes"
+            ],
+            "env": {
+                "XDEBUG_CONFIG": "remote_port=${port}"
+            }
+        },
+        {
+            "type": "java",
+            "name": "Launch with Arguments Prompt",
+            "request": "launch",
+            "mainClass": "",
+            "args": "${command:SpecifyProgramArgs}"
+        },
+        {
+            "name": "Attach to Process",
+            "type": "go",
+            "request": "attach",
+            "mode": "local",
+            "processId": 0
+        },
+        {
+            "name": "Flutter",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "Attach Camel Debugger after starting the Camel Application using the preLaunchTask specified",
+            "type": "apache.camel",
+            "request": "attach",
+            "preLaunchTask": "Start Camel application"
+        },
+        {
+            "name": ".NET Core Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/<target-framework>/<project-name.dll>",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "pipeTransport": {
+                "pipeCwd": "${workspaceFolder}",
+                "pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'",
+                "pipeArgs": [],
+                "debuggerPath": "enter the path for the debugger on the target machine, for example ~/netcoredbg/netcoredbg"
+            }
+        },
+        {
+            // Use IntelliSense to find out which attributes exist for C# debugging
+            // Use hover for the description of the existing attributes
+            // For further information visit https://github.com/dotnet/vscode-csharp/blob/main/debugger-launchjson.md
+            "name": ".NET Core Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/dependabot-core/nuget/helpers/lib/NuGetUpdater/artifacts/Windows_NT/bin/NuGetUpdater.Cli/debug/NuGetUpdater.Cli.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/dependabot-core/nuget/helpers/lib/NuGetUpdater/NuGetUpdater.Cli",
+            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}

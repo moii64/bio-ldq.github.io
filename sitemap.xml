@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+                            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://yoursite.github.io/</loc>
+    <lastmod>2024-10-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <mobile:mobile/>
+    <image:image>
+      <image:loc>https://scontent-syd2-1.xx.fbcdn.net/v/t39.30808-6/453168188_1029364998621239_5464512553069020285_n.jpg</image:loc>
+      <image:title>Lê Đức Quang - Profile Picture</image:title>
+      <image:caption>Content Creator, Developer, Designer</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Add more pages here if you expand your site -->
+  <!--
+  <url>
+    <loc>https://yoursite.github.io/portfolio</loc>
+    <lastmod>2024-10-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://yoursite.github.io/blog</loc>
+    <lastmod>2024-10-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  -->
+
+</urlset>
+

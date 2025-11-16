@@ -1,0 +1,24 @@
+# Security Policy
+# https://securitytxt.org/
+
+Contact: mailto:your-email@example.com
+Preferred-Languages: vi, en
+Canonical: https://yoursite.github.io/.well-known/security.txt
+
+# Reporting Security Issues
+# If you discover a security vulnerability, please report it to the contact above.
+# Please include:
+# - Description of the vulnerability
+# - Steps to reproduce
+# - Potential impact
+# - Any suggested fixes
+
+Policy: https://yoursite.github.io/security-policy
+Acknowledgments: https://yoursite.github.io/security-acknowledgments
+
+# Encryption key
+# Encryption: https://yoursite.github.io/pgp-key.txt
+
+# Expires in 1 year
+Expires: 2025-10-13T00:00:00.000Z
+

@@ -1,0 +1,50 @@
+.task-page-header {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: fadeInUp 0.8s ease;
+}
+
+.header-content {
+  text-align: center;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-color, #ffffff);
+  text-decoration: none;
+  margin-bottom: 15px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.back-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-5px);
+}
+
+.task-page-header h1 {
+  color: var(--text-color, #ffffff);
+  font-size: 32px;
+  font-weight: 700;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+  margin-top: 10px;
+}
+

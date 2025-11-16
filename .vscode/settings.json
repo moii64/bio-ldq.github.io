@@ -1,0 +1,9 @@
+{
+    "claudeCodeChat.permissions.yoloMode": true,
+    "Codegeex.RepoIndex": true,
+    "Codegeex.CommitMessageStyle": "Auto",
+    "texra.model.baseUrlDeepSeek": " https://api.deepseek.com",
+    "texra.model.useCopilot": false,
+    "texra.model.useImprovedConnection": false,
+    "texra.model.useAnthropic1MBeta": true
+}
