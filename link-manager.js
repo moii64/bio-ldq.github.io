@@ -12,12 +12,13 @@ class LinkManager {
     }
 
     init() {
-        // Nếu không có links trong localStorage, load từ HTML
-        if (this.links.length === 0) {
-            this.loadLinksFromHTML();
+        // Chỉ render links từ localStorage nếu có
+        // Nếu localStorage trống, giữ nguyên links HTML ban đầu
+        if (this.links.length > 0) {
+            // Có links trong localStorage, render chúng
+            this.renderLinks();
         }
-        
-        this.renderLinks();
+        // Luôn thêm nút quản lý
         this.addManageButton();
     }
 
@@ -25,9 +26,9 @@ class LinkManager {
         const linkCards = document.querySelectorAll('.links-container .link-card');
         this.links = [];
         
-        linkCards.forEach(card => {
+        linkCards.forEach((card, index) => {
             const link = {
-                id: Date.now() + Math.random(),
+                id: Date.now() + index,
                 title: card.querySelector('.link-title')?.textContent || '',
                 subtitle: card.querySelector('.link-subtitle')?.textContent || '',
                 url: card.getAttribute('href') || '#',
@@ -57,6 +58,11 @@ class LinkManager {
     }
 
     showManageModal() {
+        // Nếu localStorage trống, load links từ HTML trước
+        if (this.links.length === 0) {
+            this.loadLinksFromHTML();
+        }
+        
         const modal = Widgets.showModal('Quản lý Links', this.createManageForm());
         
         // Bind events
@@ -65,16 +71,39 @@ class LinkManager {
             addBtn.addEventListener('click', () => this.showAddEditModal());
         }
         
+        const resetBtn = modal.querySelector('.reset-links-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetToHTML());
+        }
+        
         // Render links list
         this.renderLinksList(modal);
+    }
+    
+    resetToHTML() {
+        if (!confirm('Bạn có chắc muốn xóa tất cả links đã quản lý và quay về links HTML ban đầu?')) {
+            return;
+        }
+        
+        // Xóa localStorage
+        localStorage.removeItem('bioLinkCards');
+        this.links = [];
+        
+        // Reload trang để hiển thị links HTML ban đầu
+        window.location.reload();
     }
 
     createManageForm() {
         return `
             <div class="links-manager">
-                <button class="add-link-btn btn btn-primary">
-                    <i class="fas fa-plus"></i> Thêm Link Mới
-                </button>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <button class="add-link-btn btn btn-primary" style="flex: 1;">
+                        <i class="fas fa-plus"></i> Thêm Link Mới
+                    </button>
+                    <button class="reset-links-btn btn btn-secondary" style="flex: 1;">
+                        <i class="fas fa-undo"></i> Reset về HTML
+                    </button>
+                </div>
                 <div class="links-list" id="linksList"></div>
             </div>
         `;
@@ -269,26 +298,30 @@ class LinkManager {
     }
 
     renderLinks() {
-        // Xóa tất cả links cũ
-        this.linksContainer.innerHTML = '';
-        
+        // Chỉ render nếu có links trong localStorage và đã được chỉnh sửa
+        // Nếu không, giữ nguyên links HTML ban đầu
         if (this.links.length === 0) {
-            const emptyMsg = document.createElement('div');
-            emptyMsg.className = 'empty-links';
-            emptyMsg.innerHTML = `
-                <i class="fas fa-link"></i>
-                <p>Chưa có links nào. Nhấn "Quản lý Links" để thêm.</p>
-            `;
-            this.linksContainer.appendChild(emptyMsg);
+            // Không làm gì, giữ nguyên links HTML
             return;
         }
+        
+        // Xóa tất cả links cũ
+        this.linksContainer.innerHTML = '';
         
         // Render các links
         this.links.forEach(link => {
             const linkCard = document.createElement('a');
             linkCard.href = link.url;
-            linkCard.target = '_blank';
-            linkCard.rel = 'noopener noreferrer';
+            
+            // Chỉ mở tab mới cho links ngoài (http/https), không phải links nội bộ
+            if (link.url && (link.url.startsWith('http://') || link.url.startsWith('https://'))) {
+                linkCard.target = '_blank';
+                linkCard.rel = 'noopener noreferrer';
+            } else {
+                // Links nội bộ (relative paths) mở trong cùng tab
+                linkCard.target = '_self';
+            }
+            
             linkCard.className = `link-card ${link.special ? 'special' : ''}`;
             
             linkCard.innerHTML = `

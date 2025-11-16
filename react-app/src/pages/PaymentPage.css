@@ -1,0 +1,6 @@
+/* Payment page styles are imported from parent payment.css */
+.payment-container {
+  min-height: 100vh;
+  padding: 20px;
+}
+
