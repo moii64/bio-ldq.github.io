@@ -11,6 +11,9 @@
     "check:supabase": "node check-supabase-connection.js",
     "setup:db": "node setup-database.js",
     "setup:all": "node setup-all-tables.js",
+    "run:sql": "node run-sql-now.js",
+    "copy:sql": "node copy-sql-to-clipboard.js",
+    "exec:sql": "node execute-sql.js",
     "clean:md": "node delete-md-files.js"
   },
   "keywords": [
