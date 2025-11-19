@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xóa Cache - Bio Link</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .info-box p {
+            margin: 5px 0;
+            color: #333;
+        }
+        .status {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .status.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .status.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            transition: transform 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+        .cache-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #333;
+        }
+        .cache-info code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Xóa Cache & LocalStorage</h1>
+        
+        <div class="info-box">
+            <p><strong>⚠️ Tại sao cần xóa?</strong></p>
+            <p>Script <code>link-manager.js</code> lưu links vào localStorage. Nếu có dữ liệu cũ, nó sẽ ghi đè links HTML mới và khiến các trang không mở được.</p>
+        </div>
+
+        <div class="cache-info" id="cacheInfo">
+            <p><strong>Thông tin localStorage:</strong></p>
+            <p id="storageStatus">Đang kiểm tra...</p>
+        </div>
+
+        <button onclick="clearAllCache()">🗑️ Xóa localStorage và Reload</button>
+        <button onclick="window.location.href='index.html'" class="btn-secondary">🏠 Quay về trang chủ</button>
+
+        <div id="result" class="status" style="display: none;">
+            <p id="resultText"></p>
+        </div>
+
+        <div class="info-box" style="margin-top: 30px;">
+            <p><strong>📋 Các bước thủ công:</strong></p>
+            <ol style="padding-left: 20px; margin-top: 10px;">
+                <li>Mở Console (F12)</li>
+                <li>Chạy: <code>localStorage.clear()</code></li>
+                <li>Reload trang (Ctrl+R hoặc F5)</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function checkLocalStorage() {
+            const bioLinkCards = localStorage.getItem('bioLinkCards');
+            const bioLinkTasks = localStorage.getItem('bioLinkTasks');
+            const bioTheme = localStorage.getItem('bioTheme');
+            
+            let html = '';
+            let hasData = false;
+            
+            if (bioLinkCards) {
+                const links = JSON.parse(bioLinkCards);
+                html += `<code>bioLinkCards</code>: ${links.length} links được lưu<br>`;
+                hasData = true;
+            } else {
+                html += `<code>bioLinkCards</code>: Trống ✓<br>`;
+            }
+            
+            if (bioLinkTasks) {
+                html += `<code>bioLinkTasks</code>: Có dữ liệu<br>`;
+            } else {
+                html += `<code>bioLinkTasks</code>: Trống ✓<br>`;
+            }
+            
+            if (bioTheme) {
+                html += `<code>bioTheme</code>: ${bioTheme}<br>`;
+            }
+            
+            if (hasData) {
+                html += '<br><strong style="color: #dc3545;">⚠️ Phát hiện dữ liệu links cũ! Cần xóa để links mới hoạt động.</strong>';
+            } else {
+                html += '<br><strong style="color: #28a745;">✅ LocalStorage sạch, links sẽ hoạt động bình thường!</strong>';
+            }
+            
+            document.getElementById('storageStatus').innerHTML = html;
+        }
+
+        function clearAllCache() {
+            try {
+                // Clear localStorage
+                localStorage.clear();
+                
+                // Show success message
+                const result = document.getElementById('result');
+                const resultText = document.getElementById('resultText');
+                resultText.textContent = '✅ Đã xóa localStorage thành công! Đang reload trang...';
+                result.className = 'status success';
+                result.style.display = 'block';
+                
+                // Reload after 1 second
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } catch (error) {
+                const result = document.getElementById('result');
+                const resultText = document.getElementById('resultText');
+                resultText.textContent = '❌ Lỗi: ' + error.message;
+                result.className = 'status error';
+                result.style.display = 'block';
+            }
+        }
+
+        // Check on load
+        checkLocalStorage();
+    </script>
+</body>
+</html>
+
