@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import TaskList from '../components/TaskList';
 import TaskModal from '../components/TaskModal';
@@ -8,6 +8,27 @@ const TasksPage = ({ tasks, setTasks }) => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [taskFilter, setTaskFilter] = useState('all');
+
+  // Thêm task AI Support nếu chưa có
+  useEffect(() => {
+    const aiSupportTaskExists = tasks.some(task => 
+      task.title && task.title.toLowerCase().includes('trò chuyện agenl ai support')
+    );
+    
+    if (!aiSupportTaskExists) {
+      const aiSupportTask = {
+        id: 'ai-support-task-' + Date.now(),
+        title: 'Trò chuyện Agenl AI Support',
+        description: 'Liên hệ và trò chuyện với hệ thống hỗ trợ AI Agenl',
+        priority: 'high',
+        dueDate: '',
+        category: 'Hỗ trợ',
+        completed: false,
+        createdAt: new Date().toISOString()
+      };
+      setTasks([aiSupportTask, ...tasks]);
+    }
+  }, []); // Chỉ chạy một lần khi component mount
 
   const addTask = (taskData) => {
     const newTask = {

@@ -436,31 +436,31 @@
             let authCheckAttempts = 0;
             const maxAttempts = 50; // 5 seconds max wait
             const checkInterval = 100; // Check every 100ms
-            
+
             function checkAuthReady() {
                 authCheckAttempts++;
-                
+
                 if (typeof Auth !== 'undefined') {
                     // Auth is loaded, mark as ready
                     window.AuthReady = true;
                     console.log('✓ Auth system is ready');
                     return true;
                 }
-                
+
                 if (authCheckAttempts >= maxAttempts) {
                     console.warn('⚠ Auth system not loaded after maximum attempts');
                     window.AuthReady = false;
                     return false;
                 }
-                
+
                 // Continue checking
                 setTimeout(checkAuthReady, checkInterval);
                 return false;
             }
-            
+
             // Start checking immediately
             checkAuthReady();
-            
+
             // Also expose a promise-based check
             window.waitForAuth = function(timeout = 5000) {
                 return new Promise((resolve) => {
@@ -468,7 +468,7 @@
                         resolve(true);
                         return;
                     }
-                    
+
                     const startTime = Date.now();
                     const checkInterval = setInterval(() => {
                         if (typeof Auth !== 'undefined') {
@@ -503,7 +503,31 @@
                 this.currentFilter = 'all';
                 this.editingTaskId = null;
 
+                // Thêm task AI Support nếu chưa có
+                this.addAISupportTaskIfNeeded();
+
                 this.init();
+            }
+
+            addAISupportTaskIfNeeded() {
+                const aiSupportTaskExists = this.tasks.some(task =>
+                    task.title && task.title.toLowerCase().includes('trò chuyện agenl ai support')
+                );
+
+                if (!aiSupportTaskExists) {
+                    const aiSupportTask = {
+                        id: 'ai-support-task-' + Date.now(),
+                        title: 'Trò chuyện Agenl AI Support',
+                        description: 'Liên hệ và trò chuyện với hệ thống hỗ trợ AI Agenl',
+                        priority: 'high',
+                        dueDate: '',
+                        category: 'Hỗ trợ',
+                        completed: false,
+                        createdAt: new Date().toISOString()
+                    };
+                    this.tasks.unshift(aiSupportTask);
+                    this.saveTasks();
+                }
             }
 
             init() {
@@ -752,7 +776,7 @@
                     attempts++;
                 }
             }
-            
+
             // Wait for Auth to be ready before checking status
             if (typeof Auth !== 'undefined' && typeof Auth.isReady === 'function') {
                 try {
@@ -761,15 +785,15 @@
                     console.warn('Auth initialization warning:', error);
                 }
             }
-            
+
             // Check authentication status
             checkAuthStatus();
-            
+
             taskManager = new TaskManager();
 
             // Register Modal functionality
             initRegisterModal();
-            
+
             // Listen for auth ready event
             window.addEventListener('authReady', () => {
                 console.log('Auth ready event received');
@@ -808,7 +832,7 @@
                 const taskSection = document.getElementById('taskSection');
                 const guestMessage = document.getElementById('guestMessage');
                 const paymentLink = document.getElementById('paymentLink');
-                
+
                 if (loginBtn) loginBtn.style.display = 'flex';
                 if (registerBtn) registerBtn.style.display = 'flex';
                 if (userMenu) userMenu.style.display = 'none';
@@ -832,7 +856,7 @@
                 // User is logged in
                 const session = await Auth.getSession();
                 const user = await Auth.getCurrentUser();
-                
+
                 if (loginBtn) loginBtn.style.display = 'none';
                 if (registerBtn) registerBtn.style.display = 'none';
                 if (userMenu) userMenu.style.display = 'flex';
@@ -847,7 +871,7 @@
                         const profileName = document.querySelector('.profile-name');
                         const profileBio = document.querySelector('.profile-bio');
                         const profileImg = document.getElementById('profileImg');
-                        
+
                         if (profileName && user.profile.name) {
                             profileName.textContent = user.profile.name;
                         }
@@ -865,7 +889,7 @@
                     // Remove old listeners
                     const newLogoutBtn = logoutBtn.cloneNode(true);
                     logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
-                    
+
                     newLogoutBtn.addEventListener('click', async (e) => {
                         e.preventDefault();
                         if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
@@ -901,7 +925,7 @@
                 document.body.style.overflow = 'hidden';
                 document.body.style.position = 'fixed';
                 document.body.style.width = '100%';
-                
+
                 // Focus first input for better mobile UX
                 setTimeout(() => {
                     const firstInput = document.getElementById('registerUsername');
@@ -926,7 +950,7 @@
                 const successMsg = document.getElementById('registerSuccessMessage');
                 if (errorMsg) errorMsg.classList.remove('show');
                 if (successMsg) successMsg.classList.remove('show');
-                
+
                 // Remove validation classes
                 const inputs = registerForm ? registerForm.querySelectorAll('input') : [];
                 inputs.forEach(input => {
@@ -971,7 +995,9 @@
                 if (e.target === registerModal) {
                     e.preventDefault();
                 }
-            }, { passive: false });
+            }, {
+                passive: false
+            });
 
             // Handle mobile keyboard
             if (window.visualViewport) {
@@ -981,7 +1007,10 @@
                         const firstInput = document.querySelector('.register-form input');
                         if (firstInput && document.activeElement === firstInput) {
                             setTimeout(() => {
-                                firstInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                firstInput.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center'
+                                });
                             }, 300);
                         }
                     }
@@ -1019,7 +1048,7 @@
                 registerPasswordInput.addEventListener('input', () => {
                     const password = registerPasswordInput.value;
                     const strength = calculatePasswordStrength(password);
-                    
+
                     registerStrengthBars.forEach((bar, index) => {
                         bar.classList.remove('active');
                         if (index < strength.level) {
@@ -1029,7 +1058,7 @@
                             bar.style.background = '';
                         }
                     });
-                    
+
                     if (registerStrengthText) {
                         registerStrengthText.textContent = strength.text;
                         registerStrengthText.style.color = strength.color;
@@ -1059,7 +1088,11 @@
                     color = '#86efac';
                 }
 
-                return { level: Math.min(strength, 4), text, color };
+                return {
+                    level: Math.min(strength, 4),
+                    text,
+                    color
+                };
             }
 
             // Real-time validation
@@ -1071,7 +1104,7 @@
                 usernameInput.addEventListener('input', () => {
                     const username = usernameInput.value.trim();
                     const errorEl = document.getElementById('usernameError');
-                    
+
                     if (username.length === 0) {
                         if (errorEl) errorEl.style.display = 'none';
                         usernameInput.classList.remove('invalid', 'valid');
@@ -1100,7 +1133,7 @@
                 emailInput.addEventListener('input', () => {
                     const email = emailInput.value.trim();
                     const errorEl = document.getElementById('emailError');
-                    
+
                     if (email.length === 0) {
                         if (errorEl) errorEl.style.display = 'none';
                         emailInput.classList.remove('invalid', 'valid');
@@ -1122,7 +1155,7 @@
                     const confirmPassword = registerConfirmPasswordInput.value;
                     const password = registerPasswordInput.value;
                     const errorEl = document.getElementById('confirmPasswordError');
-                    
+
                     if (confirmPassword.length === 0) {
                         if (errorEl) errorEl.style.display = 'none';
                         registerConfirmPasswordInput.classList.remove('invalid', 'valid');
@@ -1143,7 +1176,7 @@
                     const password = registerPasswordInput.value;
                     const confirmPassword = registerConfirmPasswordInput.value;
                     const errorEl = document.getElementById('passwordError');
-                    
+
                     if (password.length === 0) {
                         if (errorEl) errorEl.style.display = 'none';
                         registerPasswordInput.classList.remove('invalid', 'valid');
@@ -1156,7 +1189,7 @@
                         registerPasswordInput.classList.remove('invalid');
                         registerPasswordInput.classList.add('valid');
                     }
-                    
+
                     // Update confirm password validation
                     if (confirmPassword && confirmPassword !== password) {
                         showFieldError('confirmPasswordError', 'Mật khẩu xác nhận không khớp!');
@@ -1175,7 +1208,7 @@
             if (registerForm) {
                 registerForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    
+
                     const username = document.getElementById('registerUsername').value.trim();
                     const email = document.getElementById('registerEmail').value.trim();
                     const password = registerPasswordInput.value;
@@ -1252,11 +1285,11 @@
                     try {
                         // Wait for Auth to be loaded with retry mechanism
                         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải hệ thống...';
-                        
+
                         let authLoaded = false;
                         let retryCount = 0;
                         const maxRetries = 20; // 2 seconds
-                        
+
                         // Retry loop to wait for Auth
                         while (!authLoaded && retryCount < maxRetries) {
                             if (typeof Auth !== 'undefined') {
@@ -1266,10 +1299,10 @@
                             await new Promise(resolve => setTimeout(resolve, 100));
                             retryCount++;
                         }
-                        
+
                         if (!authLoaded) {
                             showRegisterError('Hệ thống xác thực chưa được tải. Đang thử lại tự động...');
-                            
+
                             // Try one more time with longer wait
                             if (typeof window.waitForAuth === 'function') {
                                 const ready = await window.waitForAuth(3000);
@@ -1289,7 +1322,7 @@
 
                         // Wait for Auth to be ready (Supabase initialization)
                         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang khởi tạo...';
-                        
+
                         if (typeof Auth.isReady === 'function') {
                             const isReady = await Auth.isReady();
                             if (!isReady) {
@@ -1313,7 +1346,7 @@
 
                         // Auth methods are async with Supabase, so we need to await
                         const result = await Auth.register(username, email, password);
-                        
+
                         if (result.success) {
                             showRegisterSuccess('Đăng ký thành công! Đang chuyển hướng...');
                             setTimeout(() => {
@@ -1340,7 +1373,7 @@
                 if (errorEl) {
                     errorEl.textContent = message;
                     errorEl.style.display = 'block';
-                    
+
                     // Find the corresponding input field
                     const formGroup = errorEl.closest('.form-group');
                     if (formGroup) {
@@ -1362,7 +1395,7 @@
                         errorEl.style.display = 'none';
                     }
                 });
-                
+
                 // Clear invalid classes
                 const inputs = registerForm.querySelectorAll('input');
                 inputs.forEach(input => {
@@ -1375,7 +1408,10 @@
                 errorMessage.textContent = message;
                 errorMessage.classList.add('show');
                 // Scroll to error message
-                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                errorMessage.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
                 setTimeout(() => {
                     errorMessage.classList.remove('show');
                 }, 8000);
@@ -1965,7 +2001,8 @@
             .register-modal-content {
                 max-width: 100%;
                 max-height: 100vh;
-                max-height: 100dvh; /* Dynamic viewport height for mobile */
+                max-height: 100dvh;
+                /* Dynamic viewport height for mobile */
                 border-radius: 0;
                 border-left: none;
                 border-right: none;
@@ -1973,7 +2010,8 @@
                 margin: 0;
                 width: 100%;
                 overflow-y: auto;
-                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+                -webkit-overflow-scrolling: touch;
+                /* Smooth scrolling on iOS */
                 padding-bottom: env(safe-area-inset-bottom, 0);
             }
 
@@ -2024,8 +2062,10 @@
 
             .register-form .form-group input {
                 padding: 16px 18px;
-                font-size: 16px; /* Prevent zoom on iOS */
-                min-height: 48px; /* Better touch target */
+                font-size: 16px;
+                /* Prevent zoom on iOS */
+                min-height: 48px;
+                /* Better touch target */
             }
 
             .register-form .password-wrapper {
@@ -2074,7 +2114,8 @@
             .register-submit-button {
                 padding: 18px 32px;
                 font-size: 16px;
-                min-height: 52px; /* Better touch target */
+                min-height: 52px;
+                /* Better touch target */
                 width: 100%;
                 margin-top: 8px;
             }
@@ -2264,6 +2305,29 @@
             flex-direction: column;
             gap: 15px;
             margin-bottom: 25px;
+            max-height: 60vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .task-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .task-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .task-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .task-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .task-item {

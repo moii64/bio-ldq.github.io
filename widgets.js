@@ -595,10 +595,30 @@ const Widgets = {
                 padding: 30px;
                 max-width: 500px;
                 width: 90%;
-                max-height: 80vh;
-                overflow-y: auto;
+                max-height: 85vh;
+                overflow: hidden;
                 position: relative;
                 animation: modalSlideIn 0.3s ease;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .modal-content::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            .modal-content::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 10px;
+            }
+            
+            .modal-content::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+            }
+            
+            .modal-content::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.3);
             }
 
             @keyframes modalSlideIn {
@@ -647,6 +667,29 @@ const Widgets = {
             .modal-body {
                 color: rgba(255, 255, 255, 0.9);
                 line-height: 1.6;
+                overflow-y: auto;
+                overflow-x: hidden;
+                max-height: calc(85vh - 120px);
+                padding-right: 10px;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .modal-body::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            .modal-body::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 10px;
+            }
+            
+            .modal-body::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+            }
+            
+            .modal-body::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.3);
             }
 
             .qr-image {

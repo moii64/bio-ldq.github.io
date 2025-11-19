@@ -28,7 +28,27 @@ function App() {
   const [theme, setTheme] = useState<string>(localStorage.getItem('bioTheme') || 'gradient');
   const [tasks, setTasks] = useState<Task[]>(() => {
     const saved = localStorage.getItem('bioLinkTasks');
-    return saved ? JSON.parse(saved) : [];
+    const parsedTasks = saved ? JSON.parse(saved) : [];
+    
+    // Thêm task mặc định "trò chuyện agenl ai support" nếu chưa có
+    const aiSupportTaskExists = parsedTasks.some(task => 
+      task.title && task.title.toLowerCase().includes('trò chuyện agenl ai support')
+    );
+    
+    if (!aiSupportTaskExists) {
+      const aiSupportTask: Task = {
+        id: 'ai-support-task-' + Date.now(),
+        title: 'Trò chuyện Agenl AI Support',
+        description: 'Liên hệ và trò chuyện với hệ thống hỗ trợ AI Agenl',
+        priority: 'high',
+        dueDate: '',
+        completed: false,
+        createdAt: new Date().toISOString()
+      };
+      return [aiSupportTask, ...parsedTasks];
+    }
+    
+    return parsedTasks;
   });
   const [showTaskModal, setShowTaskModal] = useState<boolean>(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);

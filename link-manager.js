@@ -397,12 +397,37 @@ class LinkManager {
             }
             
             .links-manager {
-                max-height: 60vh;
-                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                max-height: 70vh;
+                overflow: hidden;
             }
             
             .links-list {
                 margin-top: 20px;
+                max-height: calc(70vh - 100px);
+                overflow-y: auto;
+                overflow-x: hidden;
+                padding-right: 10px;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .links-list::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            .links-list::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 10px;
+            }
+            
+            .links-list::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+            }
+            
+            .links-list::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.3);
             }
             
             .link-item {
@@ -414,6 +439,7 @@ class LinkManager {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                min-height: 60px;
             }
             
             .link-item-content {
@@ -421,28 +447,39 @@ class LinkManager {
                 align-items: center;
                 gap: 15px;
                 flex: 1;
+                min-width: 0;
+                overflow: hidden;
             }
             
             .link-item-icon {
                 font-size: 24px;
                 width: 40px;
                 text-align: center;
+                flex-shrink: 0;
             }
             
             .link-item-info {
                 flex: 1;
+                min-width: 0;
+                overflow: hidden;
             }
             
             .link-item-title {
                 font-weight: 600;
                 display: block;
                 margin-bottom: 5px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             
             .link-item-subtitle {
                 font-size: 12px;
                 opacity: 0.7;
                 display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             
             .link-item-badge {
@@ -459,6 +496,7 @@ class LinkManager {
             .link-item-actions {
                 display: flex;
                 gap: 5px;
+                flex-shrink: 0;
             }
             
             .btn-icon {
