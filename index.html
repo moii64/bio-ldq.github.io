@@ -62,6 +62,25 @@
         </button>
     </div>
 
+    <!-- Auth Buttons -->
+    <div class="auth-buttons" id="authButtons">
+        <a href="login.html" class="auth-btn login-btn" id="loginBtn">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Đăng Nhập</span>
+        </a>
+        <a href="register.html" class="auth-btn register-btn" id="registerBtn">
+            <i class="fas fa-user-plus"></i>
+            <span>Đăng Ký</span>
+        </a>
+        <div class="user-menu" id="userMenu" style="display: none;">
+            <span class="user-name" id="userName"></span>
+            <button class="auth-btn logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Đăng Xuất</span>
+            </button>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Profile Section -->
         <div class="profile-section">
@@ -95,8 +114,8 @@
             </a>
         </div>
 
-        <!-- Task List Section -->
-        <div class="task-section">
+        <!-- Task List Section (Only show when logged in) -->
+        <div class="task-section" id="taskSection" style="display: none;">
             <div class="task-header">
                 <h2><i class="fas fa-tasks"></i> Danh sách nhiệm vụ</h2>
                 <button class="add-task-btn" id="addTaskBtn">
@@ -131,9 +150,45 @@
             </div>
         </div>
 
+        <!-- Guest Message (Show when not logged in) -->
+        <div class="guest-message" id="guestMessage">
+            <div class="guest-card">
+                <i class="fas fa-info-circle"></i>
+                <h2>Chào mừng đến với Bio Link!</h2>
+                <p>Đăng nhập hoặc đăng ký để quản lý các liên kết, nhiệm vụ và tùy chỉnh trang bio của bạn.</p>
+                <div class="guest-actions">
+                    <a href="login.html" class="guest-btn primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Đăng Nhập
+                    </a>
+                    <a href="register.html" class="guest-btn secondary">
+                        <i class="fas fa-user-plus"></i>
+                        Đăng Ký
+                    </a>
+                </div>
+                <a href="features.html" class="features-link">
+                    <i class="fas fa-star"></i>
+                    Xem các tính năng
+                </a>
+            </div>
+        </div>
+
         <!-- Links Container -->
         <div class="links-container">
-            <a href="payment.html" class="link-card special">
+            <a href="features.html" class="link-card special">
+                <div class="link-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="link-content">
+                    <span class="link-title">Tính năng</span>
+                    <span class="link-subtitle">Khám phá các tính năng nổi bật</span>
+                </div>
+                <div class="link-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="payment.html" class="link-card special" id="paymentLink" style="display: none;">
                 <div class="link-icon">
                     <i class="fas fa-credit-card"></i>
                 </div>
@@ -292,6 +347,7 @@
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B8k8R3tDTM7/OJdGIf8Nw0AC6LrK6EoFJ8yTp3JMWMUpPk9S4VrDtCInzaY5bq5Z4b5ZY1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="auth.js"></script>
     <script src="script.js"></script>
     <script src="profile-image.js"></script>
     <script src="profile-manager.js"></script>
@@ -550,6 +606,9 @@
         // Initialize task manager when DOM is loaded
         let taskManager;
         document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication status
+            checkAuthStatus();
+            
             taskManager = new TaskManager();
 
             // Initialize crop modal event listeners
@@ -573,7 +632,277 @@
                 });
             }
         });
+
+        // Authentication status check
+        function checkAuthStatus() {
+            const isLoggedIn = typeof Auth !== 'undefined' && Auth.isLoggedIn();
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const userMenu = document.getElementById('userMenu');
+            const userName = document.getElementById('userName');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const taskSection = document.getElementById('taskSection');
+            const guestMessage = document.getElementById('guestMessage');
+            const paymentLink = document.getElementById('paymentLink');
+
+            if (isLoggedIn) {
+                // User is logged in
+                const session = Auth.getSession();
+                const user = Auth.getCurrentUser();
+                
+                if (loginBtn) loginBtn.style.display = 'none';
+                if (registerBtn) registerBtn.style.display = 'none';
+                if (userMenu) userMenu.style.display = 'flex';
+                if (userName && session) userName.textContent = session.username;
+                if (taskSection) taskSection.style.display = 'block';
+                if (guestMessage) guestMessage.style.display = 'none';
+                if (paymentLink) paymentLink.style.display = 'flex';
+
+                // Load user data
+                if (user) {
+                    if (user.profile) {
+                        const profileName = document.querySelector('.profile-name');
+                        const profileBio = document.querySelector('.profile-bio');
+                        const profileImg = document.getElementById('profileImg');
+                        
+                        if (profileName && user.profile.name) {
+                            profileName.textContent = user.profile.name;
+                        }
+                        if (profileBio && user.profile.bio) {
+                            profileBio.textContent = user.profile.bio;
+                        }
+                        if (profileImg && user.profile.image) {
+                            profileImg.src = user.profile.image;
+                        }
+                    }
+                }
+
+                // Logout handler
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                            Auth.logout();
+                            window.location.reload();
+                        }
+                    });
+                }
+            } else {
+                // User is not logged in
+                if (loginBtn) loginBtn.style.display = 'flex';
+                if (registerBtn) registerBtn.style.display = 'flex';
+                if (userMenu) userMenu.style.display = 'none';
+                if (taskSection) taskSection.style.display = 'none';
+                if (guestMessage) guestMessage.style.display = 'block';
+                if (paymentLink) paymentLink.style.display = 'none';
+            }
+        }
     </script>
+
+    <!-- Auth & Guest Styles -->
+    <style>
+        .auth-buttons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+            flex-wrap: wrap;
+        }
+
+        .auth-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 10px 18px;
+            border-radius: 50px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .auth-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .auth-btn.register-btn {
+            background: linear-gradient(135deg, #64c8ff, #00d4ff);
+            border: none;
+        }
+
+        .auth-btn.register-btn:hover {
+            box-shadow: 0 5px 20px rgba(100, 200, 255, 0.3);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 50px;
+        }
+
+        .user-name {
+            color: #64c8ff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .guest-message {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.8s ease;
+            text-align: center;
+        }
+
+        .guest-card {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .guest-card i {
+            font-size: 64px;
+            color: #64c8ff;
+            margin-bottom: 20px;
+        }
+
+        .guest-card h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #ffffff, #64c8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .guest-card p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .guest-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .guest-btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .guest-btn.primary {
+            background: linear-gradient(135deg, #64c8ff, #00d4ff);
+            color: #ffffff;
+            border: none;
+        }
+
+        .guest-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(100, 200, 255, 0.3);
+        }
+
+        .guest-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .guest-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .features-link {
+            color: #64c8ff;
+            text-decoration: none;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .features-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .auth-buttons {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                justify-content: center;
+            }
+
+            .auth-btn span {
+                display: none;
+            }
+
+            .user-menu {
+                flex-direction: column;
+                gap: 10px;
+                padding: 12px;
+            }
+
+            .user-name {
+                font-size: 12px;
+            }
+
+            .guest-message {
+                padding: 30px 20px;
+            }
+
+            .guest-card h2 {
+                font-size: 22px;
+            }
+
+            .guest-actions {
+                flex-direction: column;
+            }
+
+            .guest-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 
     <!-- Task List Styles -->
     <style>

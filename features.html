@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính năng - Bio Link</title>
+    <meta name="description" content="Khám phá các tính năng tuyệt vời của Bio Link">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .network-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
+        }
+
+        .network-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, rgba(100, 200, 255, 0.5), transparent);
+            height: 1px;
+            animation: lineMove 20s linear infinite;
+        }
+
+        @keyframes lineMove {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100vw);
+            }
+        }
+
+        .glowing-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(2px);
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .particle.orange {
+            background: radial-gradient(circle, rgba(255, 165, 0, 0.8), transparent);
+            width: 120px;
+            height: 60px;
+        }
+
+        .particle.yellow {
+            background: radial-gradient(circle, rgba(255, 255, 0, 0.6), transparent);
+            width: 100px;
+            height: 50px;
+        }
+
+        .particle.purple {
+            background: radial-gradient(circle, rgba(147, 51, 234, 0.7), transparent);
+            width: 80px;
+            height: 40px;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(20px, -30px) scale(1.1);
+            }
+            50% {
+                transform: translate(-15px, 20px) scale(0.9);
+            }
+            75% {
+                transform: translate(30px, 15px) scale(1.05);
+            }
+        }
+
+        .network-dots {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .dot {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(100, 200, 255, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(100, 200, 255, 0.8);
+        }
+
+        /* Main Content */
+        .container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .hero-section {
+            text-align: center;
+            padding: 60px 20px;
+            margin-bottom: 60px;
+        }
+
+        .hero-section h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff, #64c8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-section p {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: rgba(20, 20, 30, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #64c8ff);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(100, 200, 255, 0.6);
+            box-shadow: 0 20px 60px rgba(100, 200, 255, 0.2);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(100, 200, 255, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            border: 1px solid rgba(100, 200, 255, 0.3);
+        }
+
+        .feature-icon i {
+            font-size: 32px;
+            color: #64c8ff;
+        }
+
+        .feature-card h3 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .feature-card p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #64c8ff;
+            font-weight: bold;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(20, 20, 30, 0.5);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            margin-top: 60px;
+        }
+
+        .cta-section h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff, #64c8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-button {
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cta-button.primary {
+            background: linear-gradient(135deg, #64c8ff, #00d4ff);
+            color: #ffffff;
+            border: none;
+        }
+
+        .cta-button.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(100, 200, 255, 0.3);
+        }
+
+        .cta-button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cta-button.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .back-button {
+                top: 20px;
+                left: 20px;
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .hero-section h1 {
+                font-size: 32px;
+            }
+
+            .hero-section p {
+                font-size: 16px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .feature-card {
+                padding: 30px;
+            }
+
+            .cta-section h2 {
+                font-size: 28px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .cta-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="background">
+        <div class="network-lines" id="networkLines"></div>
+        <div class="network-dots" id="networkDots"></div>
+        <div class="glowing-particles" id="glowingParticles"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <a href="index.html" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại
+        </a>
+
+        <div class="hero-section">
+            <h1>✨ Tính Năng Nổi Bật</h1>
+            <p>Khám phá các tính năng mạnh mẽ và hiện đại của Bio Link - nền tảng bio link tốt nhất cho bạn</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-palette"></i>
+                </div>
+                <h3>🎨 Nhiều Theme Đẹp</h3>
+                <p>Tùy chỉnh giao diện với 6+ theme hiện đại:</p>
+                <ul class="feature-list">
+                    <li>Gradient Theme</li>
+                    <li>Glassmorphism Theme</li>
+                    <li>Neon Dark Theme</li>
+                    <li>Minimal Clean Theme</li>
+                    <li>Nature Green Theme</li>
+                    <li>Sunset Theme</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-magic"></i>
+                </div>
+                <h3>🌸 Hiệu Ứng Theo Mùa</h3>
+                <p>Trải nghiệm độc đáo với hiệu ứng theo mùa:</p>
+                <ul class="feature-list">
+                    <li>Xuân: Hoa rơi lãng mạn</li>
+                    <li>Hạ: Sóng biển mát mẻ</li>
+                    <li>Thu: Lá vàng bay</li>
+                    <li>Đông: Tuyết rơi ấm áp</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3>📱 Responsive Design</h3>
+                <p>Hoàn hảo trên mọi thiết bị:</p>
+                <ul class="feature-list">
+                    <li>Điện thoại di động</li>
+                    <li>Tablet</li>
+                    <li>Desktop</li>
+                    <li>Tối ưu cho mọi màn hình</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <h3>📋 Quản Lý Nhiệm Vụ</h3>
+                <p>Hệ thống quản lý nhiệm vụ tích hợp:</p>
+                <ul class="feature-list">
+                    <li>Tạo và chỉnh sửa nhiệm vụ</li>
+                    <li>Đánh dấu hoàn thành</li>
+                    <li>Lọc theo trạng thái</li>
+                    <li>Thống kê tiến độ</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-link"></i>
+                </div>
+                <h3>🔗 Quản Lý Liên Kết</h3>
+                <p>Dễ dàng quản lý các liên kết của bạn:</p>
+                <ul class="feature-list">
+                    <li>Thêm/sửa/xóa liên kết</li>
+                    <li>Sắp xếp thứ tự</li>
+                    <li>Liên kết đặc biệt</li>
+                    <li>Icon và màu sắc tùy chỉnh</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h3>👤 Quản Lý Profile</h3>
+                <p>Tùy chỉnh profile cá nhân:</p>
+                <ul class="feature-list">
+                    <li>Upload và cắt ảnh đại diện</li>
+                    <li>Thay đổi tên và mô tả</li>
+                    <li>Liên kết mạng xã hội</li>
+                    <li>Lưu tự động</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>📊 Thống Kê & Analytics</h3>
+                <p>Theo dõi hiệu suất của bạn:</p>
+                <ul class="feature-list">
+                    <li>Lượt xem trang</li>
+                    <li>Số lượt click liên kết</li>
+                    <li>Thống kê theo thời gian</li>
+                    <li>Báo cáo chi tiết</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <h3>🔲 QR Code Generator</h3>
+                <p>Tạo và chia sẻ QR code:</p>
+                <ul class="feature-list">
+                    <li>Tạo QR code cho trang</li>
+                    <li>Tải xuống QR code</li>
+                    <li>Chia sẻ dễ dàng</li>
+                    <li>In ấn chất lượng cao</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-share-alt"></i>
+                </div>
+                <h3>📤 Chia Sẻ Xã Hội</h3>
+                <p>Chia sẻ trang của bạn:</p>
+                <ul class="feature-list">
+                    <li>Facebook</li>
+                    <li>Twitter</li>
+                    <li>WhatsApp</li>
+                    <li>Telegram</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h3>🔐 Bảo Mật & Đăng Nhập</h3>
+                <p>Hệ thống bảo mật mạnh mẽ:</p>
+                <ul class="feature-list">
+                    <li>Đăng ký và đăng nhập</li>
+                    <li>Bảo mật dữ liệu</li>
+                    <li>Lưu trữ an toàn</li>
+                    <li>Quản lý tài khoản</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>⚡ Hiệu Suất Cao</h3>
+                <p>Tối ưu hóa hiệu suất:</p>
+                <ul class="feature-list">
+                    <li>Tải trang nhanh</li>
+                    <li>60 FPS animations</li>
+                    <li>Tối ưu code</li>
+                    <li>Service Worker</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-universal-access"></i>
+                </div>
+                <h3>♿ Accessibility</h3>
+                <p>Thân thiện với mọi người:</p>
+                <ul class="feature-list">
+                    <li>Keyboard navigation</li>
+                    <li>Screen reader support</li>
+                    <li>High contrast mode</li>
+                    <li>Assistive touch</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <h2>🚀 Bắt Đầu Ngay Hôm Nay</h2>
+            <p>Tạo trang bio link của riêng bạn và chia sẻ với thế giới</p>
+            <div class="cta-buttons">
+                <a href="register.html" class="cta-button primary">
+                    <i class="fas fa-user-plus"></i>
+                    Đăng Ký Ngay
+                </a>
+                <a href="index.html" class="cta-button secondary">
+                    <i class="fas fa-eye"></i>
+                    Xem Demo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create network lines
+        const networkLines = document.getElementById('networkLines');
+        for (let i = 0; i < 20; i++) {
+            const line = document.createElement('div');
+            line.className = 'network-line';
+            line.style.top = Math.random() * 100 + '%';
+            line.style.left = Math.random() * 100 + '%';
+            line.style.width = Math.random() * 300 + 200 + 'px';
+            line.style.animationDelay = Math.random() * 20 + 's';
+            line.style.animationDuration = (Math.random() * 10 + 15) + 's';
+            networkLines.appendChild(line);
+        }
+
+        // Create network dots
+        const networkDots = document.getElementById('networkDots');
+        for (let i = 0; i < 50; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.style.left = Math.random() * 100 + '%';
+            dot.style.top = Math.random() * 100 + '%';
+            dot.style.animationDelay = Math.random() * 5 + 's';
+            networkDots.appendChild(dot);
+        }
+
+        // Create glowing particles
+        const glowingParticles = document.getElementById('glowingParticles');
+        const particleTypes = ['orange', 'yellow', 'purple'];
+        for (let i = 0; i < 15; i++) {
+            const particle = document.createElement('div');
+            particle.className = `particle ${particleTypes[Math.floor(Math.random() * particleTypes.length)]}`;
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            glowingParticles.appendChild(particle);
+        }
+    </script>
+</body>
+
+</html>
+
+
