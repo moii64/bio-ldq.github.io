@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chạy SQL Scripts - Supabase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .sql-files {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .sql-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .sql-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+        .sql-card.active {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .sql-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        .sql-card .info {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+        .btn-secondary {
+            background: #764ba2;
+        }
+        .btn-secondary:hover {
+            background: #5d3a7a;
+        }
+        .sql-content {
+            margin-top: 30px;
+            display: none;
+        }
+        .sql-content.active {
+            display: block;
+        }
+        .sql-textarea {
+            width: 100%;
+            min-height: 400px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            resize: vertical;
+            background: #f9f9f9;
+        }
+        .instructions {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .instructions ol {
+            margin-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .instructions a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .instructions a:hover {
+            text-decoration: underline;
+        }
+        .copy-btn {
+            background: #28a745;
+            margin-top: 10px;
+        }
+        .copy-btn:hover {
+            background: #218838;
+        }
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        .success-msg.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Chạy SQL Scripts trên Supabase</h1>
+        <p class="subtitle">Chọn file SQL để copy và chạy trên Supabase Dashboard</p>
+
+        <div class="sql-files">
+            <div class="sql-card" data-file="supabase-setup.sql">
+                <h3>1. Profiles & Authentication</h3>
+                <div class="info">
+                    📄 File: supabase-setup.sql<br>
+                    📊 Kích thước: ~2.5 KB<br>
+                    📝 Số dòng: 85
+                </div>
+                <button class="btn" onclick="loadSQL('supabase-setup.sql')">Chọn file này</button>
+            </div>
+
+            <div class="sql-card" data-file="chat-database.sql">
+                <h3>2. Chat Support Database</h3>
+                <div class="info">
+                    📄 File: chat-database.sql<br>
+                    📊 Kích thước: ~20 KB<br>
+                    📝 Số dòng: 598
+                </div>
+                <button class="btn" onclick="loadSQL('chat-database.sql')">Chọn file này</button>
+            </div>
+        </div>
+
+        <div class="sql-content" id="sqlContent">
+            <h2 id="sqlTitle"></h2>
+            <textarea class="sql-textarea" id="sqlTextarea" readonly></textarea>
+            <button class="btn copy-btn" onclick="copySQL()">📋 Copy SQL</button>
+            <button class="btn btn-secondary" onclick="openDashboard()">🌐 Mở Supabase Dashboard</button>
+            <div class="success-msg" id="successMsg">✅ Đã copy vào clipboard!</div>
+
+            <div class="instructions">
+                <h3>📝 Hướng dẫn chạy SQL:</h3>
+                <ol>
+                    <li>Click nút <strong>"📋 Copy SQL"</strong> ở trên (hoặc Ctrl+A, Ctrl+C)</li>
+                    <li>Click nút <strong>"🌐 Mở Supabase Dashboard"</strong> hoặc truy cập:
+                        <a href="https://supabase.com/dashboard/project/novylftuwqdeamiyxxfp/sql/new" target="_blank">
+                            https://supabase.com/dashboard/project/novylftuwqdeamiyxxfp/sql/new
+                        </a>
+                    </li>
+                    <li>Trong SQL Editor, click <strong>"New query"</strong></li>
+                    <li>Paste SQL đã copy (Ctrl+V)</li>
+                    <li>Click <strong>"Run"</strong> (hoặc Ctrl+Enter)</li>
+                    <li>Đợi thông báo <strong>"Success"</strong></li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadSQL(filename) {
+            // Remove active class from all cards
+            document.querySelectorAll('.sql-card').forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // Add active class to selected card
+            const selectedCard = document.querySelector(`[data-file="${filename}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('active');
+            }
+
+            // Show SQL content area
+            const sqlContent = document.getElementById('sqlContent');
+            sqlContent.classList.add('active');
+
+            // Update title
+            const titles = {
+                'supabase-setup.sql': '📄 Profiles & Authentication (supabase-setup.sql)',
+                'chat-database.sql': '📄 Chat Support Database (chat-database.sql)'
+            };
+            document.getElementById('sqlTitle').textContent = titles[filename] || filename;
+
+            // Load SQL content
+            try {
+                const response = await fetch(filename);
+                if (!response.ok) {
+                    throw new Error('Không thể tải file');
+                }
+                const sql = await response.text();
+                document.getElementById('sqlTextarea').value = sql;
+            } catch (error) {
+                document.getElementById('sqlTextarea').value = `❌ Lỗi: Không thể tải file ${filename}\n\nVui lòng đảm bảo file tồn tại trong cùng thư mục.`;
+            }
+        }
+
+        function copySQL() {
+            const textarea = document.getElementById('sqlTextarea');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // For mobile devices
+
+            try {
+                document.execCommand('copy');
+                const successMsg = document.getElementById('successMsg');
+                successMsg.classList.add('show');
+                setTimeout(() => {
+                    successMsg.classList.remove('show');
+                }, 3000);
+            } catch (err) {
+                alert('Không thể copy tự động. Vui lòng copy thủ công (Ctrl+A, Ctrl+C)');
+            }
+        }
+
+        function openDashboard() {
+            window.open('https://supabase.com/dashboard/project/novylftuwqdeamiyxxfp/sql/new', '_blank');
+        }
+
+        // Auto-select first file on load
+        window.addEventListener('load', () => {
+            loadSQL('supabase-setup.sql');
+        });
+    </script>
+</body>
+</html>
+
