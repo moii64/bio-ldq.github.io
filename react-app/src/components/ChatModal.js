@@ -51,6 +51,63 @@ const ChatModal = ({
         }
     ];
 
+    // Hàm tạo phản hồi tự động dựa trên prompt key và nội dung
+    const generateAutoResponse = (promptKey, userMessage) => {
+        const messageLower = userMessage.toLowerCase();
+
+        // Phản hồi theo prompt key
+        switch (promptKey) {
+            case 'TECH_SUPPORT':
+                if (messageLower.includes('đăng nhập') || messageLower.includes('login')) {
+                    return 'Về vấn đề đăng nhập, bạn vui lòng:\n1. Kiểm tra lại email và mật khẩu\n2. Thử quên mật khẩu nếu cần\n3. Xóa cache trình duyệt và thử lại\n\nNếu vẫn không được, vui lòng cung cấp thêm thông tin để chúng tôi hỗ trợ tốt hơn.';
+                }
+                if (messageLower.includes('lỗi') || messageLower.includes('error') || messageLower.includes('bug')) {
+                    return 'Cảm ơn bạn đã báo lỗi! Để chúng tôi xử lý nhanh nhất:\n1. Mô tả chi tiết lỗi bạn gặp phải\n2. Chụp màn hình nếu có thể\n3. Cho biết bạn đang sử dụng trình duyệt/thiết bị gì\n\nChúng tôi sẽ xử lý ngay khi nhận được thông tin.';
+                }
+                return 'Cảm ơn bạn đã liên hệ về hỗ trợ kỹ thuật! Vui lòng mô tả chi tiết vấn đề bạn đang gặp phải:\n- Bạn đang làm gì khi gặp lỗi?\n- Thông báo lỗi hiển thị như thế nào?\n- Vấn đề xảy ra từ khi nào?\n\nChúng tôi sẽ phản hồi trong thời gian sớm nhất.';
+
+            case 'PAYMENT_ISSUE':
+                if (messageLower.includes('hoàn tiền') || messageLower.includes('refund')) {
+                    return 'Về yêu cầu hoàn tiền:\n- Chúng tôi sẽ xử lý trong vòng 5-7 ngày làm việc\n- Tiền sẽ được hoàn về phương thức thanh toán ban đầu\n- Bạn sẽ nhận được email xác nhận khi hoàn tất\n\nVui lòng cung cấp mã đơn hàng để chúng tôi kiểm tra.';
+                }
+                if (messageLower.includes('thanh toán') || messageLower.includes('payment') || messageLower.includes('mua')) {
+                    return 'Về vấn đề thanh toán:\n- Chúng tôi hỗ trợ nhiều phương thức: thẻ tín dụng, chuyển khoản, ví điện tử\n- Nếu gặp lỗi khi thanh toán, vui lòng thử lại hoặc dùng phương thức khác\n- Kiểm tra số dư tài khoản của bạn\n\nVui lòng cho biết phương thức thanh toán bạn đang sử dụng.';
+                }
+                return 'Cảm ơn bạn đã liên hệ về vấn đề thanh toán! Vui lòng cung cấp:\n- Mã đơn hàng (nếu có)\n- Phương thức thanh toán bạn đã sử dụng\n- Mô tả vấn đề cụ thể\n\nChúng tôi sẽ kiểm tra và phản hồi ngay.';
+
+            case 'BUG_REPORT':
+                return 'Cảm ơn bạn đã báo lỗi! Để chúng tôi xử lý hiệu quả, vui lòng cung cấp:\n\n📋 Thông tin cần thiết:\n1. Mô tả chi tiết lỗi\n2. Các bước để tái hiện lỗi\n3. Chụp màn hình/ảnh minh họa\n4. Trình duyệt và phiên bản đang dùng\n5. Thời điểm lỗi xảy ra\n\nChúng tôi sẽ ưu tiên xử lý và cập nhật cho bạn sớm nhất.';
+
+            case 'FEATURE_REQUEST':
+                return 'Cảm ơn bạn đã đề xuất tính năng mới! Ý tưởng của bạn rất quan trọng với chúng tôi.\n\nVui lòng mô tả:\n- Tính năng bạn muốn thêm là gì?\n- Lợi ích của tính năng này?\n- Cách bạn muốn sử dụng nó?\n\nĐội ngũ phát triển sẽ xem xét và có thể triển khai trong các phiên bản tới.';
+
+            case 'ACCOUNT_HELP':
+                if (messageLower.includes('đổi mật khẩu') || messageLower.includes('password')) {
+                    return 'Để đổi mật khẩu:\n1. Vào Cài đặt tài khoản\n2. Chọn "Đổi mật khẩu"\n3. Nhập mật khẩu cũ và mật khẩu mới\n4. Xác nhận thay đổi\n\nNếu quên mật khẩu, sử dụng chức năng "Quên mật khẩu" trên trang đăng nhập.';
+                }
+                if (messageLower.includes('xóa') || messageLower.includes('delete')) {
+                    return 'Về yêu cầu xóa tài khoản:\n- Chúng tôi rất tiếc khi bạn muốn rời đi\n- Tài khoản sẽ bị xóa vĩnh viễn sau 30 ngày\n- Bạn có thể hủy yêu cầu trong thời gian này\n\nVui lòng xác nhận lại yêu cầu của bạn.';
+                }
+                return 'Về hỗ trợ tài khoản, chúng tôi có thể giúp bạn:\n- Đổi thông tin cá nhân\n- Quản lý mật khẩu\n- Cài đặt bảo mật\n- Vấn đề đăng nhập\n\nVui lòng cho biết bạn cần hỗ trợ về vấn đề gì cụ thể?';
+
+            case 'GENERAL_QUESTION':
+                return 'Cảm ơn bạn đã liên hệ! Chúng tôi sẵn sàng trả lời mọi câu hỏi của bạn.\n\nVui lòng đặt câu hỏi cụ thể để chúng tôi có thể hỗ trợ bạn tốt nhất. Bạn có thể hỏi về:\n- Hướng dẫn sử dụng\n- Chính sách dịch vụ\n- Giá cả và gói dịch vụ\n- Hoặc bất kỳ thắc mắc nào khác';
+
+            default:
+                // Phân tích nội dung tin nhắn để phản hồi thông minh
+                if (messageLower.includes('cảm ơn') || messageLower.includes('thank')) {
+                    return 'Không có gì! Rất vui được hỗ trợ bạn. Nếu cần thêm gì, đừng ngần ngại liên hệ nhé! 😊';
+                }
+                if (messageLower.includes('xin chào') || messageLower.includes('hello') || messageLower.includes('hi')) {
+                    return 'Xin chào! Tôi có thể giúp gì cho bạn hôm nay?';
+                }
+                if (messageLower.includes('giá') || messageLower.includes('price') || messageLower.includes('cost')) {
+                    return 'Về giá cả, chúng tôi có nhiều gói dịch vụ phù hợp với nhu cầu khác nhau. Bạn có thể xem chi tiết tại trang thanh toán hoặc cho tôi biết nhu cầu của bạn để tôi tư vấn gói phù hợp nhất.';
+                }
+                return 'Cảm ơn bạn đã liên hệ! Tôi đã nhận được tin nhắn của bạn. Đội ngũ hỗ trợ sẽ phản hồi sớm nhất có thể. Trong thời gian chờ, bạn có thể:\n- Xem FAQ tại trang chủ\n- Kiểm tra email để nhận thông báo\n- Liên hệ lại nếu cần hỗ trợ khẩn cấp';
+        }
+    };
+
     const scrollToBottom = () => {
         messagesEndRef.current ? .scrollIntoView({
             behavior: 'smooth'
@@ -65,8 +122,24 @@ const ChatModal = ({
         e.preventDefault();
         if (!inputMessage.trim()) return;
 
-        // Lưu prompt key nếu có
-        const promptKey = samplePrompts.find(p => p.text === inputMessage) ? .key || 'CUSTOM';
+        // Tìm prompt key từ nội dung hoặc prompt mẫu
+        let promptKey = 'CUSTOM';
+        const matchedPrompt = samplePrompts.find(p => p.text === inputMessage);
+        if (matchedPrompt) {
+            promptKey = matchedPrompt.key;
+        } else {
+            // Phân tích nội dung để xác định prompt key
+            const messageLower = inputMessage.toLowerCase();
+            if (messageLower.includes('kỹ thuật') || messageLower.includes('lỗi') || messageLower.includes('error') || messageLower.includes('bug')) {
+                promptKey = 'TECH_SUPPORT';
+            } else if (messageLower.includes('thanh toán') || messageLower.includes('payment') || messageLower.includes('mua') || messageLower.includes('hoàn tiền')) {
+                promptKey = 'PAYMENT_ISSUE';
+            } else if (messageLower.includes('tính năng') || messageLower.includes('feature') || messageLower.includes('yêu cầu')) {
+                promptKey = 'FEATURE_REQUEST';
+            } else if (messageLower.includes('tài khoản') || messageLower.includes('account') || messageLower.includes('đăng nhập')) {
+                promptKey = 'ACCOUNT_HELP';
+            }
+        }
 
         // Thêm tin nhắn của user với metadata
         const userMessage = {
@@ -89,16 +162,18 @@ const ChatModal = ({
         });
         localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
 
-        // Simulate AI response
+        // Tạo phản hồi tự động thông minh
+        const delay = 800 + Math.random() * 700; // Delay 0.8-1.5s để tự nhiên hơn
         setTimeout(() => {
+            const aiResponseText = generateAutoResponse(promptKey, inputMessage);
             const aiResponse = {
                 id: messages.length + 2,
-                text: 'Cảm ơn bạn đã liên hệ! Tôi đã nhận được tin nhắn của bạn. Đội ngũ hỗ trợ sẽ phản hồi sớm nhất có thể.',
+                text: aiResponseText,
                 sender: 'ai',
                 timestamp: new Date()
             };
             setMessages(prev => [...prev, aiResponse]);
-        }, 1000);
+        }, delay);
     };
 
     const handlePromptClick = (prompt) => {
@@ -140,16 +215,16 @@ const ChatModal = ({
         div >
         <
         h3 > Agenl AI Support < /h3> <
-        span className = "chat-status" > Đang trực tuyến < /span> <
-        /div> <
+        span className = "chat-status" > Đang trực tuyến < /span> < /
+        div > <
         /div> <
         button className = "close-btn"
         onClick = {
             onClose
         } >
         <
-        i className = "fas fa-times" > < /i> <
-        /button> <
+        i className = "fas fa-times" > < /i> < /
+        button > <
         /div>
 
         <
@@ -165,32 +240,37 @@ const ChatModal = ({
                 <
                 div className = "message-content" >
                 <
-                p > {
+                p style = {
+                    {
+                        whiteSpace: 'pre-line'
+                    }
+                } > {
                     message.text
                 } < /p> <
                 span className = "message-time" > {
                     formatTime(message.timestamp)
-                } < /span> <
-                /div> <
+                } < /span> < /
+                div > <
                 /div>
             ))
         } <
         div ref = {
             messagesEndRef
         }
-        /> <
-        /div>
+        /> < /
+        div >
 
         {
-            /* Prompt mẫu */ } {
+            /* Prompt mẫu */
+        } {
             showPrompts && messages.length <= 1 && ( <
                 div className = "chat-prompts" >
                 <
                 div className = "prompts-header" >
                 <
                 i className = "fas fa-bolt" > < /i> <
-                span > Chọn nhanh: < /span> <
-                /div> <
+                span > Chọn nhanh: < /span> < /
+                div > <
                 div className = "prompts-list" > {
                     samplePrompts.map((prompt, index) => ( <
                         button key = {
@@ -207,12 +287,12 @@ const ChatModal = ({
                         } > < /i> <
                         span > {
                             prompt.text
-                        } < /span> <
-                        /button>
+                        } < /span> < /
+                        button >
                     ))
                 } <
-                /div> <
-                /div>
+                /div> < /
+                div >
             )
         }
 
@@ -256,12 +336,12 @@ const ChatModal = ({
             !inputMessage.trim()
         } >
         <
-        i className = "fas fa-paper-plane" > < /i> <
-        /button> <
-        /div> <
-        /form> <
-        /div> <
-        /div>
+        i className = "fas fa-paper-plane" > < /i> < /
+        button > <
+        /div> < /
+        form > <
+        /div> < /
+        div >
     );
 };
 
