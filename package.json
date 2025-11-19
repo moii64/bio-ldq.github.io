@@ -7,7 +7,8 @@
     "dev": "python -m http.server 8000",
     "start": "python -m http.server 8000",
     "chat-db:help": "node upload-chat-db.js --help",
-    "chat-db:upload": "node upload-chat-db.js"
+    "chat-db:upload": "node upload-chat-db.js",
+    "check:supabase": "node check-supabase-connection.js"
   },
   "keywords": [
     "bio-link",
