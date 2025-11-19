@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Profile from './components/Profile';
+import Login from './pages/Login';
+import UserProfile from './pages/UserProfile';
+import RequireAuth from './components/RequireAuth';
 import TaskList from './components/TaskList';
 import LinkCards from './components/LinkCards';
 import TaskModal from './components/TaskModal';
@@ -148,6 +151,8 @@ function App() {
             </div>
           } />
           <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
           <Route path="/tasks" element={
             <TasksPage 
               tasks={tasks}

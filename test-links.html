@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm Tra Liên Kết - Bio Link</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #ffffff, #64c8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .test-section h2 {
+            margin-bottom: 20px;
+            color: #64c8ff;
+        }
+        .link-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .link-item a {
+            color: #64c8ff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .link-item a:hover {
+            text-decoration: underline;
+        }
+        .status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status.pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+        .status.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        .test-btn {
+            background: linear-gradient(135deg, #64c8ff, #00d4ff);
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(100, 200, 255, 0.3);
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #64c8ff;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Quay lại trang chủ</a>
+        
+        <h1>🔍 Kiểm Tra Liên Kết & File</h1>
+
+        <div class="test-section">
+            <h2>📄 Các File HTML Chính</h2>
+            <div class="link-item">
+                <a href="index.html" target="_blank">index.html</a>
+                <span class="status pending" id="status-index">Đang kiểm tra...</span>
+            </div>
+            <div class="link-item">
+                <a href="features.html" target="_blank">features.html</a>
+                <span class="status pending" id="status-features">Đang kiểm tra...</span>
+            </div>
+            <div class="link-item">
+                <a href="login.html" target="_blank">login.html</a>
+                <span class="status pending" id="status-login">Đang kiểm tra...</span>
+            </div>
+            <div class="link-item">
+                <a href="register.html" target="_blank">register.html</a>
+                <span class="status pending" id="status-register">Đang kiểm tra...</span>
+            </div>
+            <div class="link-item">
+                <a href="contact.html" target="_blank">contact.html</a>
+                <span class="status pending" id="status-contact">Đang kiểm tra...</span>
+            </div>
+            <div class="link-item">
+                <a href="cv.html" target="_blank">cv.html</a>
+                <span class="status pending" id="status-cv">Đang kiểm tra...</span>
+            </div>
+            <div class="link-item">
+                <a href="website.html" target="_blank">website.html</a>
+                <span class="status pending" id="status-website">Đang kiểm tra...</span>
+            </div>
+            <div class="link-item">
+                <a href="payment.html" target="_blank">payment.html</a>
+                <span class="status pending" id="status-payment">Đang kiểm tra...</span>
+            </div>
+            <div class="link-item">
+                <a href="special-link.html" target="_blank">special-link.html</a>
+                <span class="status pending" id="status-special">Đang kiểm tra...</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📜 Các File JavaScript</h2>
+            <div class="link-item">
+                <span>auth.js</span>
+                <span class="status pending" id="status-auth-js">Đang kiểm tra...</span>
+            </div>
+            <div class="link-item">
+                <span>script.js</span>
+                <span class="status pending" id="status-script-js">Đang kiểm tra...</span>
+            </div>
+            <div class="link-item">
+                <span>profile-image.js</span>
+                <span class="status pending" id="status-profile-js">Đang kiểm tra...</span>
+            </div>
+            <div class="link-item">
+                <span>link-manager.js</span>
+                <span class="status pending" id="status-link-js">Đang kiểm tra...</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Các File Tài Liệu</h2>
+            <div class="link-item">
+                <a href="IMPROVEMENTS.md" target="_blank">IMPROVEMENTS.md</a>
+                <span class="status pending" id="status-improvements">Đang kiểm tra...</span>
+            </div>
+            <div class="link-item">
+                <a href="CHANGELOG.md" target="_blank">CHANGELOG.md</a>
+                <span class="status pending" id="status-changelog">Đang kiểm tra...</span>
+            </div>
+        </div>
+
+        <button class="test-btn" onclick="testAllLinks()">🔄 Kiểm Tra Tất Cả</button>
+    </div>
+
+    <script>
+        const filesToCheck = {
+            'index.html': 'status-index',
+            'features.html': 'status-features',
+            'login.html': 'status-login',
+            'register.html': 'status-register',
+            'contact.html': 'status-contact',
+            'cv.html': 'status-cv',
+            'website.html': 'status-website',
+            'payment.html': 'status-payment',
+            'special-link.html': 'status-special',
+            'auth.js': 'status-auth-js',
+            'script.js': 'status-script-js',
+            'profile-image.js': 'status-profile-js',
+            'link-manager.js': 'status-link-js',
+            'IMPROVEMENTS.md': 'status-improvements',
+            'CHANGELOG.md': 'status-changelog'
+        };
+
+        function updateStatus(file, statusElementId, success) {
+            const statusElement = document.getElementById(statusElementId);
+            if (statusElement) {
+                statusElement.className = 'status ' + (success ? 'success' : 'error');
+                statusElement.textContent = success ? '✓ Hoạt động' : '✗ Lỗi';
+            }
+        }
+
+        async function checkFile(file) {
+            try {
+                const response = await fetch(file, { method: 'HEAD' });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        async function testAllLinks() {
+            for (const [file, statusId] of Object.entries(filesToCheck)) {
+                updateStatus(file, statusId, false);
+                const exists = await checkFile(file);
+                updateStatus(file, statusId, exists);
+                // Delay để tránh quá tải
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+        }
+
+        // Tự động kiểm tra khi trang load
+        window.addEventListener('load', () => {
+            setTimeout(testAllLinks, 500);
+        });
+    </script>
+</body>
+</html>
+
