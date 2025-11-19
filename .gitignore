@@ -1,6 +1,10 @@
 # Supabase Config (contains sensitive credentials)
 config.js
 
+# Submodules and embedded repos (not properly configured)
+bio-ldq.github.io/
+dependabot-core/
+
 # Node modules
 node_modules/
 npm-debug.log*
