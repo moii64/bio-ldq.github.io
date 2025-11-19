@@ -293,10 +293,16 @@
                     };
                     this.tasks.unshift(aiSupportTask);
                     this.saveTasks();
+                    // Render lại ngay sau khi thêm task
+                    if (this.initialized) {
+                        this.renderTasks();
+                        this.updateStats();
+                    }
                 }
             }
 
             init() {
+                this.initialized = true;
                 this.bindEvents();
                 this.renderTasks();
                 this.updateStats();
@@ -558,7 +564,8 @@
                                 <input type="checkbox" ${task.completed ? 'checked' : ''} 
                                        onchange="taskManager.toggleTask('${task.id}')">
                             </div>
-                            <div class="task-content">
+                            <div class="task-content ${task.title && task.title.includes('Trò chuyện Agenl AI Support') ? 'chat-task' : ''}" 
+                                 ${task.title && task.title.includes('Trò chuyện Agenl AI Support') ? `onclick="Widgets.showChatModal()" style="cursor: pointer;"` : ''}>
                                 <h4 class="task-title">
                                     ${task.icon ? `<i class="${task.icon}"></i> ` : ''}
                                     ${this.escapeHtml(task.title)}
@@ -974,6 +981,15 @@
         .task-title i {
             font-size: 18px;
             opacity: 0.9;
+        }
+        
+        .chat-task {
+            transition: all 0.3s ease;
+        }
+        
+        .chat-task:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateX(5px);
         }
 
         .task-category {

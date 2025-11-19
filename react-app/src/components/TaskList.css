@@ -165,6 +165,15 @@
   opacity: 0.9;
 }
 
+.chat-task {
+  transition: all 0.3s ease;
+}
+
+.chat-task:hover {
+  background: rgba(99, 102, 241, 0.1);
+  transform: translateX(5px);
+}
+
 .task-description {
   color: rgba(255, 255, 255, 0.7);
   font-size: 14px;

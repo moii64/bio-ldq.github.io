@@ -98,7 +98,13 @@ const TaskList = ({
                   onChange={() => onToggleTask(task.id)}
                 />
               </div>
-              <div className="task-content">
+              <div className="task-content" onClick={() => {
+                if (task.title && task.title.includes('Trò chuyện Agenl AI Support')) {
+                  if (window.showChatModal) {
+                    window.showChatModal();
+                  }
+                }
+              }} style={{ cursor: task.title && task.title.includes('Trò chuyện Agenl AI Support') ? 'pointer' : 'default' }}>
                 <h4 className="task-title">
                   {task.icon && <i className={task.icon}></i>}
                   {task.title}

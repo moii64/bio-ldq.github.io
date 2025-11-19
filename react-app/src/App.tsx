@@ -4,6 +4,7 @@ import Profile from './components/Profile';
 import TaskList from './components/TaskList';
 import LinkCards from './components/LinkCards';
 import TaskModal from './components/TaskModal';
+import ChatModal from './components/ChatModal';
 import PaymentPage from './pages/PaymentPage';
 import TasksPage from './pages/TasksPage';
 import SpecialLinkPage from './pages/SpecialLinkPage';
@@ -54,6 +55,7 @@ function App() {
     return parsedTasks;
   });
   const [showTaskModal, setShowTaskModal] = useState<boolean>(false);
+  const [showChatModal, setShowChatModal] = useState<boolean>(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'completed'>('all');
 
@@ -67,6 +69,14 @@ function App() {
     document.body.className = theme === 'gradient' ? '' : `theme-${theme}`;
     localStorage.setItem('bioTheme', theme);
   }, [theme]);
+
+  // Expose chat modal function globally for TaskList
+  useEffect(() => {
+    window.showChatModal = () => setShowChatModal(true);
+    return () => {
+      delete window.showChatModal;
+    };
+  }, []);
 
   const addTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'completed'>) => {
     const newTask: Task = {
@@ -163,6 +173,10 @@ function App() {
             onSave={editingTask ? (data) => updateTask(editingTask.id, data) : addTask}
             onClose={closeTaskModal}
           />
+        )}
+
+        {showChatModal && (
+          <ChatModal onClose={() => setShowChatModal(false)} />
         )}
       </div>
     </Router>
