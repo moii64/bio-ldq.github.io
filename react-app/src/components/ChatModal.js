@@ -55,7 +55,6 @@ const ChatModal = ({
     const generateAutoResponse = (promptKey, userMessage) => {
         const messageLower = userMessage.toLowerCase();
 
-        // Phản hồi theo prompt key
         switch (promptKey) {
             case 'TECH_SUPPORT':
                 if (messageLower.includes('đăng nhập') || messageLower.includes('login')) {

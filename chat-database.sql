@@ -443,3 +443,155 @@ COMMENT ON COLUMN chat_sessions.prompt_key IS 'Key to identify request type: TEC
 COMMENT ON COLUMN chat_messages.sender_type IS 'Type of sender: user, ai, or cs (customer support)';
 COMMENT ON COLUMN chat_messages.prompt_key IS 'Key to identify the type of request for this message';
 
+-- ============================================
+-- 5. JOBS TABLE
+-- Bảng để quản lý các job/task cần xử lý
+-- ============================================
+CREATE TABLE IF NOT EXISTS jobs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    job_type TEXT NOT NULL, -- Loại job: 'chat_notification', 'email_send', 'data_export', etc.
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
+    payload JSONB DEFAULT '{}'::jsonb, -- Dữ liệu job
+    priority INTEGER DEFAULT 0, -- Độ ưu tiên (số càng cao càng ưu tiên)
+    attempts INTEGER DEFAULT 0, -- Số lần thử
+    max_attempts INTEGER DEFAULT 3, -- Số lần thử tối đa
+    error_message TEXT,
+    result JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    started_at TIMESTAMP WITH TIME ZONE,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    scheduled_at TIMESTAMP WITH TIME ZONE -- Thời gian lên lịch
+);
+
+-- Indexes for jobs table
+CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+CREATE INDEX IF NOT EXISTS idx_jobs_type ON jobs(job_type);
+CREATE INDEX IF NOT EXISTS idx_jobs_priority ON jobs(priority DESC);
+CREATE INDEX IF NOT EXISTS idx_jobs_scheduled_at ON jobs(scheduled_at) WHERE scheduled_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at DESC);
+
+-- Function to process pending jobs
+CREATE OR REPLACE FUNCTION process_pending_jobs()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  job_cur REFCURSOR;
+  rec RECORD;
+BEGIN
+  OPEN job_cur FOR 
+    SELECT id, payload, job_type 
+    FROM jobs 
+    WHERE status = 'pending' 
+      AND (scheduled_at IS NULL OR scheduled_at <= NOW())
+    ORDER BY priority DESC, created_at ASC
+    FOR UPDATE SKIP LOCKED
+    LIMIT 100; -- Giới hạn số job xử lý mỗi lần
+
+  LOOP
+    FETCH job_cur INTO rec;
+    EXIT WHEN NOT FOUND;
+
+    -- Cập nhật trạng thái thành processing
+    UPDATE jobs 
+    SET 
+      status = 'processing',
+      started_at = NOW(),
+      updated_at = NOW(),
+      attempts = attempts + 1
+    WHERE id = rec.id;
+
+    -- Thêm logic xử lý khác ở đây dựa trên job_type
+    -- Ví dụ: gửi email, xử lý notification, export data, etc.
+    
+  END LOOP;
+  
+  CLOSE job_cur;
+END;
+$$;
+
+-- Function to mark job as completed
+CREATE OR REPLACE FUNCTION complete_job(job_id UUID, result_data JSONB DEFAULT NULL)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE jobs
+  SET 
+    status = 'completed',
+    result = result_data,
+    completed_at = NOW(),
+    updated_at = NOW()
+  WHERE id = job_id;
+END;
+$$;
+
+-- Function to mark job as failed
+CREATE OR REPLACE FUNCTION fail_job(job_id UUID, error_msg TEXT)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  job_rec RECORD;
+BEGIN
+  SELECT * INTO job_rec FROM jobs WHERE id = job_id;
+  
+  IF job_rec.attempts >= job_rec.max_attempts THEN
+    -- Đã vượt quá số lần thử tối đa
+    UPDATE jobs
+    SET 
+      status = 'failed',
+      error_message = error_msg,
+      completed_at = NOW(),
+      updated_at = NOW()
+    WHERE id = job_id;
+  ELSE
+    -- Vẫn còn cơ hội thử lại
+    UPDATE jobs
+    SET 
+      status = 'pending',
+      error_message = error_msg,
+      updated_at = NOW()
+    WHERE id = job_id;
+  END IF;
+END;
+$$;
+
+-- Trigger to update updated_at for jobs
+CREATE TRIGGER update_jobs_updated_at
+    BEFORE UPDATE ON jobs
+    FOR EACH ROW
+    EXECUTE FUNCTION update_chat_updated_at();
+
+-- RLS for jobs table
+ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Only system/service role can manage jobs
+CREATE POLICY "System can manage jobs"
+    ON jobs FOR ALL
+    USING (true)
+    WITH CHECK (true);
+
+-- Grant permissions
+GRANT SELECT, INSERT, UPDATE ON jobs TO authenticated;
+
+-- View: Pending jobs by type
+CREATE OR REPLACE VIEW pending_jobs_by_type AS
+SELECT 
+    job_type,
+    COUNT(*) as total_pending,
+    MIN(created_at) as oldest_job,
+    MAX(priority) as highest_priority
+FROM jobs
+WHERE status = 'pending'
+GROUP BY job_type
+ORDER BY total_pending DESC;
+
+-- Comments
+COMMENT ON TABLE jobs IS 'Bảng quản lý các job/task cần xử lý bất đồng bộ';
+COMMENT ON COLUMN jobs.job_type IS 'Loại job: chat_notification, email_send, data_export, etc.';
+COMMENT ON COLUMN jobs.status IS 'Trạng thái: pending, processing, completed, failed';
+COMMENT ON COLUMN jobs.payload IS 'Dữ liệu job dưới dạng JSON';
+COMMENT ON FUNCTION process_pending_jobs() IS 'Xử lý các job đang pending, sử dụng SKIP LOCKED để tránh conflict';
+
