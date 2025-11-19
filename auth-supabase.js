@@ -1,0 +1,757 @@
+/**
+ * Authentication System for Bio Link using Supabase
+ * Handles user registration, login, logout, and session management
+ * 
+ * Setup Instructions:
+ * 1. Create a Supabase project at https://supabase.com
+ * 2. Get your project URL and anon key from Settings > API
+ * 3. Update SUPABASE_CONFIG below with your credentials
+ * 4. Run the SQL migrations in supabase-setup.sql in your Supabase SQL Editor
+ */
+
+// Supabase Configuration
+// Try to load from config.js first, fallback to default
+let SUPABASE_CONFIG = {
+    url: 'YOUR_SUPABASE_URL', // e.g., 'https://xxxxx.supabase.co'
+    anonKey: 'YOUR_SUPABASE_ANON_KEY' // Your anon/public key
+};
+
+// Load config from config.js if available
+if (typeof window !== 'undefined') {
+    // Try to get config immediately
+    if (window.SUPABASE_CONFIG) {
+        SUPABASE_CONFIG = window.SUPABASE_CONFIG;
+    }
+    
+    // Also listen for config load event
+    window.addEventListener('supabaseConfigLoaded', function() {
+        if (window.SUPABASE_CONFIG) {
+            SUPABASE_CONFIG = window.SUPABASE_CONFIG;
+            console.log('Supabase config loaded from config.js');
+        }
+    });
+    
+    // Fallback: check again after a short delay
+    setTimeout(function() {
+        if (window.SUPABASE_CONFIG && SUPABASE_CONFIG.url === 'YOUR_SUPABASE_URL') {
+            SUPABASE_CONFIG = window.SUPABASE_CONFIG;
+        }
+    }, 100);
+}
+
+// Initialize Supabase client
+let supabase = null;
+let supabaseLoading = false;
+
+// Load Supabase from CDN
+async function loadSupabase() {
+    return new Promise((resolve, reject) => {
+        // Check if already loaded
+        if (window.supabase) {
+            supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+            resolve(true);
+            return;
+        }
+
+        // Check if already loading
+        if (supabaseLoading) {
+            const checkInterval = setInterval(() => {
+                if (window.supabase) {
+                    clearInterval(checkInterval);
+                    supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+                    resolve(true);
+                }
+            }, 100);
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                reject(new Error('Timeout loading Supabase'));
+            }, 10000);
+            return;
+        }
+
+        // Load Supabase from CDN
+        if (!document.querySelector('script[src*="supabase"]')) {
+            supabaseLoading = true;
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+            script.onload = () => {
+                if (window.supabase) {
+                    supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+                    supabaseLoading = false;
+                    resolve(true);
+                } else {
+                    supabaseLoading = false;
+                    reject(new Error('Supabase failed to load'));
+                }
+            };
+            script.onerror = () => {
+                supabaseLoading = false;
+                reject(new Error('Failed to load Supabase script'));
+            };
+            document.head.appendChild(script);
+        } else {
+            // Script already exists, wait for it
+            const checkInterval = setInterval(() => {
+                if (window.supabase) {
+                    clearInterval(checkInterval);
+                    supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+                    resolve(true);
+                }
+            }, 100);
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                reject(new Error('Timeout waiting for Supabase'));
+            }, 10000);
+        }
+    });
+}
+
+const Auth = {
+    // Storage keys for fallback
+    SESSION_KEY: 'bioLinkSession',
+    CURRENT_USER_KEY: 'bioLinkCurrentUser',
+    USE_SUPABASE: true, // Set to false to use localStorage fallback
+
+    /**
+     * Initialize authentication system
+     */
+    async init() {
+        if (this.USE_SUPABASE && SUPABASE_CONFIG.url !== 'YOUR_SUPABASE_URL') {
+            try {
+                await loadSupabase();
+                console.log('Supabase initialized successfully');
+            } catch (error) {
+                console.warn('Failed to load Supabase, falling back to localStorage:', error);
+                this.USE_SUPABASE = false;
+            }
+        } else if (SUPABASE_CONFIG.url === 'YOUR_SUPABASE_URL') {
+            console.warn('Supabase not configured, using localStorage fallback');
+            this.USE_SUPABASE = false;
+        }
+    },
+
+    /**
+     * Check if Supabase is available
+     */
+    isSupabaseAvailable() {
+        return this.USE_SUPABASE && supabase !== null;
+    },
+
+    /**
+     * Register a new user
+     * @param {string} username - Username
+     * @param {string} email - Email address
+     * @param {string} password - Password
+     * @returns {Promise<Object>} Result object with success status and message
+     */
+    async register(username, email, password) {
+        try {
+            if (this.isSupabaseAvailable()) {
+                // Use Supabase Auth
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: email.trim().toLowerCase(),
+                    password: password,
+                    options: {
+                        data: {
+                            username: username.trim()
+                        }
+                    }
+                });
+
+                if (authError) {
+                    return {
+                        success: false,
+                        message: this.getErrorMessage(authError.message)
+                    };
+                }
+
+                // Create user profile in profiles table
+                if (authData.user) {
+                    const { error: profileError } = await supabase
+                        .from('profiles')
+                        .insert({
+                            id: authData.user.id,
+                            username: username.trim(),
+                            email: email.trim().toLowerCase(),
+                            profile: {
+                                name: username,
+                                bio: '',
+                                image: '',
+                                socialLinks: {}
+                            },
+                            links: [],
+                            tasks: [],
+                            settings: {
+                                theme: 'gradient',
+                                seasonalEffects: true
+                            },
+                            created_at: new Date().toISOString()
+                        });
+
+                    if (profileError) {
+                        console.error('Profile creation error:', profileError);
+                        // User is created but profile failed - still return success
+                    }
+
+                    return {
+                        success: true,
+                        message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.',
+                        user: {
+                            id: authData.user.id,
+                            username: username.trim(),
+                            email: email.trim().toLowerCase()
+                        }
+                    };
+                }
+            } else {
+                // Fallback to localStorage
+                return this.registerLocalStorage(username, email, password);
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            return {
+                success: false,
+                message: 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.'
+            };
+        }
+    },
+
+    /**
+     * Login user
+     * @param {string} identifier - Username or email
+     * @param {string} password - Password
+     * @param {boolean} rememberMe - Remember login session
+     * @returns {Promise<Object>} Result object with success status and message
+     */
+    async login(identifier, password, rememberMe = false) {
+        try {
+            if (this.isSupabaseAvailable()) {
+                // First, try to find user by email (Supabase uses email for auth)
+                let email = identifier;
+                
+                // If identifier might be username, try to find email
+                if (!identifier.includes('@')) {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('email')
+                        .eq('username', identifier.toLowerCase())
+                        .single();
+                    
+                    if (profile) {
+                        email = profile.email;
+                    }
+                }
+
+                // Sign in with Supabase
+                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                    email: email.toLowerCase(),
+                    password: password
+                });
+
+                if (authError) {
+                    return {
+                        success: false,
+                        message: this.getErrorMessage(authError.message)
+                    };
+                }
+
+                if (authData.user) {
+                    // Get user profile
+                    const { data: profile, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', authData.user.id)
+                        .single();
+
+                    if (profileError) {
+                        console.error('Profile fetch error:', profileError);
+                    }
+
+                    // Save session locally
+                    const session = {
+                        userId: authData.user.id,
+                        username: profile?.username || authData.user.user_metadata?.username || email,
+                        email: authData.user.email,
+                        loginTime: new Date().toISOString(),
+                        rememberMe: rememberMe
+                    };
+
+                    if (rememberMe) {
+                        localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
+                    } else {
+                        sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
+                    }
+
+                    localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify({
+                        id: authData.user.id,
+                        username: session.username,
+                        email: authData.user.email
+                    }));
+
+                    return {
+                        success: true,
+                        message: 'Đăng nhập thành công!',
+                        user: {
+                            id: authData.user.id,
+                            username: session.username,
+                            email: authData.user.email
+                        }
+                    };
+                }
+            } else {
+                // Fallback to localStorage
+                return this.loginLocalStorage(identifier, password, rememberMe);
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            return {
+                success: false,
+                message: 'Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.'
+            };
+        }
+    },
+
+    /**
+     * Logout user
+     */
+    async logout() {
+        if (this.isSupabaseAvailable()) {
+            await supabase.auth.signOut();
+        }
+        localStorage.removeItem(this.SESSION_KEY);
+        sessionStorage.removeItem(this.SESSION_KEY);
+        localStorage.removeItem(this.CURRENT_USER_KEY);
+    },
+
+    /**
+     * Check if user is logged in
+     * @returns {Promise<boolean>} True if user is logged in
+     */
+    async isLoggedIn() {
+        if (this.isSupabaseAvailable()) {
+            const { data: { session } } = await supabase.auth.getSession();
+            return !!session;
+        }
+        const session = localStorage.getItem(this.SESSION_KEY) || sessionStorage.getItem(this.SESSION_KEY);
+        return !!session;
+    },
+
+    /**
+     * Get current user session
+     * @returns {Promise<Object|null>} Session object or null
+     */
+    async getSession() {
+        if (this.isSupabaseAvailable()) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('username')
+                    .eq('id', session.user.id)
+                    .single();
+
+                return {
+                    userId: session.user.id,
+                    username: profile?.username || session.user.user_metadata?.username || session.user.email,
+                    email: session.user.email,
+                    loginTime: session.user.created_at,
+                    rememberMe: true
+                };
+            }
+            return null;
+        }
+        const session = localStorage.getItem(this.SESSION_KEY) || sessionStorage.getItem(this.SESSION_KEY);
+        if (session) {
+            return JSON.parse(session);
+        }
+        return null;
+    },
+
+    /**
+     * Get current user data
+     * @returns {Promise<Object|null>} User object or null
+     */
+    async getCurrentUser() {
+        if (this.isSupabaseAvailable()) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return null;
+
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+
+            if (error) {
+                console.error('Get user error:', error);
+                return null;
+            }
+
+            return {
+                id: profile.id,
+                username: profile.username,
+                email: profile.email,
+                profile: profile.profile || {},
+                links: profile.links || [],
+                tasks: profile.tasks || [],
+                settings: profile.settings || {}
+            };
+        }
+
+        // Fallback to localStorage
+        const session = this.getSessionSync();
+        if (!session) return null;
+
+        const users = JSON.parse(localStorage.getItem('bioLinkUsers')) || [];
+        return users.find(u => u.id === session.userId) || null;
+    },
+
+    /**
+     * Update user data
+     * @param {string} userId - User ID
+     * @param {Object} updates - Updates to apply
+     * @returns {Promise<boolean>} Success status
+     */
+    async updateUser(userId, updates) {
+        try {
+            if (this.isSupabaseAvailable()) {
+                const { error } = await supabase
+                    .from('profiles')
+                    .update(updates)
+                    .eq('id', userId);
+
+                if (error) {
+                    console.error('Update user error:', error);
+                    return false;
+                }
+                return true;
+            } else {
+                // Fallback to localStorage
+                return this.updateUserLocalStorage(userId, updates);
+            }
+        } catch (error) {
+            console.error('Update user error:', error);
+            return false;
+        }
+    },
+
+    /**
+     * Change user password
+     * @param {string} userId - User ID
+     * @param {string} oldPassword - Current password
+     * @param {string} newPassword - New password
+     * @returns {Promise<Object>} Result object
+     */
+    async changePassword(userId, oldPassword, newPassword) {
+        try {
+            if (this.isSupabaseAvailable()) {
+                // Get current user email
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session || session.user.id !== userId) {
+                    return { success: false, message: 'Phiên đăng nhập không hợp lệ!' };
+                }
+
+                // Update password in Supabase
+                const { error } = await supabase.auth.updateUser({
+                    password: newPassword
+                });
+
+                if (error) {
+                    return {
+                        success: false,
+                        message: this.getErrorMessage(error.message)
+                    };
+                }
+
+                return { success: true, message: 'Đổi mật khẩu thành công!' };
+            } else {
+                // Fallback to localStorage
+                return this.changePasswordLocalStorage(userId, oldPassword, newPassword);
+            }
+        } catch (error) {
+            console.error('Change password error:', error);
+            return { success: false, message: 'Có lỗi xảy ra!' };
+        }
+    },
+
+    /**
+     * Get error message in Vietnamese
+     */
+    getErrorMessage(errorMessage) {
+        if (!errorMessage) return 'Có lỗi xảy ra. Vui lòng thử lại!';
+        
+        const errorMap = {
+            'Invalid login credentials': 'Email hoặc mật khẩu không đúng!',
+            'Email not confirmed': 'Vui lòng kiểm tra email và xác nhận tài khoản trước khi đăng nhập!',
+            'User already registered': 'Email này đã được sử dụng. Vui lòng đăng nhập hoặc sử dụng email khác!',
+            'User already exists': 'Email này đã được sử dụng. Vui lòng đăng nhập hoặc sử dụng email khác!',
+            'Password should be at least 6 characters': 'Mật khẩu phải có ít nhất 6 ký tự!',
+            'Password is too weak': 'Mật khẩu quá yếu. Vui lòng sử dụng mật khẩu mạnh hơn!',
+            'Invalid email': 'Email không hợp lệ. Vui lòng kiểm tra lại!',
+            'Email rate limit exceeded': 'Quá nhiều yêu cầu. Vui lòng thử lại sau vài phút!',
+            'Signup is disabled': 'Đăng ký tạm thời bị tắt. Vui lòng liên hệ quản trị viên!',
+            'Database error': 'Lỗi hệ thống. Vui lòng thử lại sau!',
+            'Network error': 'Lỗi kết nối. Vui lòng kiểm tra internet và thử lại!'
+        };
+
+        // Check exact matches first
+        for (const [key, value] of Object.entries(errorMap)) {
+            if (errorMessage.toLowerCase().includes(key.toLowerCase())) {
+                return value;
+            }
+        }
+
+        // Check for common patterns
+        if (errorMessage.includes('duplicate') || errorMessage.includes('unique')) {
+            return 'Thông tin này đã được sử dụng. Vui lòng thử giá trị khác!';
+        }
+        
+        if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+            return 'Lỗi kết nối mạng. Vui lòng kiểm tra internet và thử lại!';
+        }
+
+        // Return original message if no match, but make it more user-friendly
+        return `Lỗi: ${errorMessage}. Vui lòng thử lại hoặc liên hệ hỗ trợ nếu vấn đề tiếp tục!`;
+    },
+
+    // ========== LocalStorage Fallback Methods ==========
+
+    registerLocalStorage(username, email, password) {
+        try {
+            const users = JSON.parse(localStorage.getItem('bioLinkUsers')) || [];
+
+            if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+                return {
+                    success: false,
+                    message: 'Tên đăng nhập đã tồn tại!'
+                };
+            }
+
+            if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+                return {
+                    success: false,
+                    message: 'Email đã được sử dụng!'
+                };
+            }
+
+            const newUser = {
+                id: Date.now().toString(),
+                username: username.trim(),
+                email: email.trim().toLowerCase(),
+                password: this.hashPassword(password),
+                createdAt: new Date().toISOString(),
+                profile: {
+                    name: username,
+                    bio: '',
+                    image: '',
+                    socialLinks: {}
+                },
+                links: [],
+                tasks: [],
+                settings: {
+                    theme: 'gradient',
+                    seasonalEffects: true
+                }
+            };
+
+            users.push(newUser);
+            localStorage.setItem('bioLinkUsers', JSON.stringify(users));
+
+            return {
+                success: true,
+                message: 'Đăng ký thành công!',
+                user: {
+                    id: newUser.id,
+                    username: newUser.username,
+                    email: newUser.email
+                }
+            };
+        } catch (error) {
+            console.error('Registration error:', error);
+            return {
+                success: false,
+                message: 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.'
+            };
+        }
+    },
+
+    loginLocalStorage(identifier, password, rememberMe = false) {
+        try {
+            const users = JSON.parse(localStorage.getItem('bioLinkUsers')) || [];
+            const hashedPassword = this.hashPassword(password);
+
+            const user = users.find(u =>
+                (u.username.toLowerCase() === identifier.toLowerCase() ||
+                    u.email.toLowerCase() === identifier.toLowerCase()) &&
+                u.password === hashedPassword
+            );
+
+            if (!user) {
+                return {
+                    success: false,
+                    message: 'Tên đăng nhập/Email hoặc mật khẩu không đúng!'
+                };
+            }
+
+            const session = {
+                userId: user.id,
+                username: user.username,
+                email: user.email,
+                loginTime: new Date().toISOString(),
+                rememberMe: rememberMe
+            };
+
+            if (rememberMe) {
+                localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
+            } else {
+                sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
+            }
+
+            localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify({
+                id: user.id,
+                username: user.username,
+                email: user.email
+            }));
+
+            return {
+                success: true,
+                message: 'Đăng nhập thành công!',
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    email: user.email
+                }
+            };
+        } catch (error) {
+            console.error('Login error:', error);
+            return {
+                success: false,
+                message: 'Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.'
+            };
+        }
+    },
+
+    getSessionSync() {
+        const session = localStorage.getItem(this.SESSION_KEY) || sessionStorage.getItem(this.SESSION_KEY);
+        if (session) {
+            return JSON.parse(session);
+        }
+        return null;
+    },
+
+    updateUserLocalStorage(userId, updates) {
+        try {
+            const users = JSON.parse(localStorage.getItem('bioLinkUsers')) || [];
+            const userIndex = users.findIndex(u => u.id === userId);
+
+            if (userIndex === -1) return false;
+
+            users[userIndex] = { ...users[userIndex], ...updates };
+            localStorage.setItem('bioLinkUsers', JSON.stringify(users));
+            return true;
+        } catch (error) {
+            console.error('Update user error:', error);
+            return false;
+        }
+    },
+
+    changePasswordLocalStorage(userId, oldPassword, newPassword) {
+        try {
+            const users = JSON.parse(localStorage.getItem('bioLinkUsers')) || [];
+            const user = users.find(u => u.id === userId);
+
+            if (!user) {
+                return { success: false, message: 'Người dùng không tồn tại!' };
+            }
+
+            if (user.password !== this.hashPassword(oldPassword)) {
+                return { success: false, message: 'Mật khẩu cũ không đúng!' };
+            }
+
+            user.password = this.hashPassword(newPassword);
+            localStorage.setItem('bioLinkUsers', JSON.stringify(users));
+
+            return { success: true, message: 'Đổi mật khẩu thành công!' };
+        } catch (error) {
+            console.error('Change password error:', error);
+            return { success: false, message: 'Có lỗi xảy ra!' };
+        }
+    },
+
+    hashPassword(password) {
+        // Simple hash for demo - NOT SECURE for production
+        let hash = 0;
+        for (let i = 0; i < password.length; i++) {
+            const char = password.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return hash.toString();
+    }
+};
+
+// Initialize on load with robust error handling
+let authInitialized = false;
+let authInitPromise = null;
+let authInitError = null;
+
+if (typeof window !== 'undefined') {
+    // Initialize Auth immediately
+    (async function() {
+        try {
+            authInitPromise = Auth.init();
+            await authInitPromise;
+            authInitialized = true;
+            console.log('✓ Auth system initialized successfully');
+            
+            // Dispatch custom event to notify that Auth is ready
+            if (typeof window.dispatchEvent !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('authReady'));
+            }
+        } catch (error) {
+            authInitError = error;
+            console.error('Auth initialization error:', error);
+            authInitialized = true; // Still mark as initialized to allow fallback
+            console.log('✓ Auth system initialized with fallback mode');
+            
+            // Dispatch event even on error (fallback mode)
+            if (typeof window.dispatchEvent !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('authReady'));
+            }
+        }
+    })();
+    
+    // Expose a method to check if Auth is ready
+    Auth.isReady = async function(timeout = 5000) {
+        if (authInitialized) return true;
+        
+        // Wait for initialization promise
+        if (authInitPromise) {
+            try {
+                const startTime = Date.now();
+                while (!authInitialized && (Date.now() - startTime) < timeout) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            } catch (error) {
+                console.warn('Error waiting for Auth init:', error);
+            }
+        }
+        
+        return authInitialized;
+    };
+    
+    // Expose initialization status
+    Auth.getInitStatus = function() {
+        return {
+            initialized: authInitialized,
+            error: authInitError,
+            promise: authInitPromise
+        };
+    };
+}
+
+// Export for use in other scripts
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = Auth;
+}
+

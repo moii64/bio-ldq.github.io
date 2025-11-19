@@ -1,0 +1,21 @@
+{
+  "name": "bio-link",
+  "version": "1.0.0",
+  "description": "Bio Link - Modern personal link page with Supabase integration",
+  "scripts": {
+    "setup": "node setup-dev.js",
+    "dev": "python -m http.server 8000",
+    "start": "python -m http.server 8000"
+  },
+  "keywords": [
+    "bio-link",
+    "linktree",
+    "supabase",
+    "authentication"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}
+
