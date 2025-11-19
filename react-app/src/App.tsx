@@ -78,6 +78,15 @@ function App() {
     };
   }, []);
 
+  // Tự động hiển thị pop-up chat hỗ trợ khi trang load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowChatModal(true);
+    }, 1500); // Delay 1.5 giây để trang load hoàn toàn
+
+    return () => clearTimeout(timer);
+  }, []); // Chỉ chạy một lần khi component mount
+
   const addTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'completed'>) => {
     const newTask: Task = {
       id: Date.now().toString(),
