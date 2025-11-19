@@ -12,8 +12,8 @@
 // Supabase Configuration
 // Try to load from config.js first, fallback to default
 let SUPABASE_CONFIG = {
-    url: 'YOUR_SUPABASE_URL', // e.g., 'https://xxxxx.supabase.co'
-    anonKey: 'YOUR_SUPABASE_ANON_KEY' // Your anon/public key
+    url: 'https://novylftuwqdeamiyxxfp.supabase.co', // e.g., 'https://xxxxx.supabase.co'
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vdnlsZnR1d3FkZWFtaXl4eGZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1MzI2MjAsImV4cCI6MjA3OTEwODYyMH0._yPS_o4ItaaEnmf6QuUGhnM-MkWBA0J58lQhzdQr9EQ' // Your anon/public key
 };
 
 // Load config from config.js if available

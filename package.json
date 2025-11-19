@@ -8,7 +8,9 @@
     "start": "python -m http.server 8000",
     "chat-db:help": "node upload-chat-db.js --help",
     "chat-db:upload": "node upload-chat-db.js",
-    "check:supabase": "node check-supabase-connection.js"
+    "check:supabase": "node check-supabase-connection.js",
+    "setup:db": "node setup-database.js",
+    "clean:md": "node delete-md-files.js"
   },
   "keywords": [
     "bio-link",
@@ -18,7 +20,7 @@
   ],
   "author": "",
   "license": "MIT",
-  "devDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+    "@supabase/supabase-js": "^2.83.0"
+  }
 }
-
