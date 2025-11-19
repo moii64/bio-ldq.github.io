@@ -99,7 +99,10 @@ const TaskList = ({
                 />
               </div>
               <div className="task-content">
-                <h4 className="task-title">{task.title}</h4>
+                <h4 className="task-title">
+                  {task.icon && <i className={task.icon}></i>}
+                  {task.title}
+                </h4>
                 {task.description && (
                   <p className="task-description">{task.description}</p>
                 )}

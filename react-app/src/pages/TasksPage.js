@@ -23,6 +23,7 @@ const TasksPage = ({ tasks, setTasks }) => {
         priority: 'high',
         dueDate: '',
         category: 'Hỗ trợ',
+        icon: 'fas fa-headset',
         completed: false,
         createdAt: new Date().toISOString()
       };

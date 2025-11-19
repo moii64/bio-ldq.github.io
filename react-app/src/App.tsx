@@ -19,6 +19,8 @@ interface Task {
   description?: string;
   priority: 'low' | 'medium' | 'high';
   dueDate?: string;
+  icon?: string;
+  category?: string;
   completed: boolean;
   createdAt: string;
   completedAt?: string | null;
@@ -42,6 +44,7 @@ function App() {
         description: 'Liên hệ và trò chuyện với hệ thống hỗ trợ AI Agenl',
         priority: 'high',
         dueDate: '',
+        icon: 'fas fa-headset',
         completed: false,
         createdAt: new Date().toISOString()
       };

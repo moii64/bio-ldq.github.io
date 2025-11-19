@@ -28,6 +28,7 @@ function App() {
         priority: 'high',
         dueDate: '',
         category: 'Hỗ trợ',
+        icon: 'fas fa-headset',
         completed: false,
         createdAt: new Date().toISOString()
       };

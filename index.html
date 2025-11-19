@@ -522,6 +522,7 @@
                         priority: 'high',
                         dueDate: '',
                         category: 'Hỗ trợ',
+                        icon: 'fas fa-headset',
                         completed: false,
                         createdAt: new Date().toISOString()
                     };
@@ -694,7 +695,10 @@
                                    onchange="taskManager.toggleTask('${task.id}')">
                         </div>
                         <div class="task-content">
-                            <h4 class="task-title">${this.escapeHtml(task.title)}</h4>
+                            <h4 class="task-title">
+                                ${task.icon ? `<i class="${task.icon}"></i> ` : ''}
+                                ${this.escapeHtml(task.title)}
+                            </h4>
                             ${task.description ? `<p class="task-description">${this.escapeHtml(task.description)}</p>` : ''}
                             <div class="task-meta">
                                 <span class="task-priority priority-${task.priority}">
@@ -2379,6 +2383,14 @@
             font-weight: 600;
             margin: 0 0 8px 0;
             line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-title i {
+            font-size: 18px;
+            opacity: 0.9;
         }
 
         .task-description {
