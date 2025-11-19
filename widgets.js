@@ -773,6 +773,38 @@ const Widgets = {
                         </div>
                     </div>
                 </div>
+                <div class="chat-prompts" id="chatPrompts">
+                    <div class="prompts-header">
+                        <i class="fas fa-bolt"></i>
+                        <span>Chọn nhanh:</span>
+                    </div>
+                    <div class="prompts-list">
+                        <button type="button" class="prompt-btn" data-key="TECH_SUPPORT">
+                            <i class="fas fa-tools"></i>
+                            <span>Tôi cần hỗ trợ kỹ thuật</span>
+                        </button>
+                        <button type="button" class="prompt-btn" data-key="PAYMENT_ISSUE">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Câu hỏi về thanh toán</span>
+                        </button>
+                        <button type="button" class="prompt-btn" data-key="BUG_REPORT">
+                            <i class="fas fa-bug"></i>
+                            <span>Báo lỗi / Sự cố</span>
+                        </button>
+                        <button type="button" class="prompt-btn" data-key="FEATURE_REQUEST">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Yêu cầu tính năng mới</span>
+                        </button>
+                        <button type="button" class="prompt-btn" data-key="ACCOUNT_HELP">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Hỗ trợ tài khoản</span>
+                        </button>
+                        <button type="button" class="prompt-btn" data-key="GENERAL_QUESTION">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Câu hỏi chung</span>
+                        </button>
+                    </div>
+                </div>
                 <form class="chat-input-form" id="chatForm">
                     <div class="chat-input-container">
                         <input type="text" class="chat-input" id="chatInput" placeholder="Nhập tin nhắn của bạn..." autofocus>
@@ -792,15 +824,20 @@ const Widgets = {
         const chatForm = modal.querySelector('#chatForm');
         const chatInput = modal.querySelector('#chatInput');
         const chatMessages = modal.querySelector('#chatMessages');
+        const chatPrompts = modal.querySelector('#chatPrompts');
 
-        chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const message = chatInput.value.trim();
-            if (!message) return;
+        const sendMessage = (message, promptKey = 'CUSTOM') => {
+            if (!message.trim()) return;
+
+            // Ẩn prompts sau khi gửi
+            if (chatPrompts) {
+                chatPrompts.style.display = 'none';
+            }
 
             // Thêm tin nhắn user
             const userMessage = document.createElement('div');
             userMessage.className = 'chat-message user-message';
+            userMessage.setAttribute('data-prompt-key', promptKey);
             userMessage.innerHTML = `
                 <div class="message-content">
                     <p>${this.escapeHtml(message)}</p>
@@ -810,6 +847,15 @@ const Widgets = {
             chatMessages.appendChild(userMessage);
             chatInput.value = '';
             chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Lưu vào localStorage để CS truy xuất
+            const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+            chatHistory.push({
+                message: message,
+                promptKey: promptKey,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
 
             // Simulate AI response
             setTimeout(() => {
@@ -824,6 +870,39 @@ const Widgets = {
                 chatMessages.appendChild(aiMessage);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }, 1000);
+        };
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = chatInput.value.trim();
+            sendMessage(message);
+        });
+
+        // Xử lý click vào prompt buttons
+        modal.querySelectorAll('.prompt-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const promptText = btn.querySelector('span').textContent;
+                const promptKey = btn.getAttribute('data-key');
+                chatInput.value = promptText;
+                sendMessage(promptText, promptKey);
+            });
+        });
+
+        // Hiển thị/ẩn prompts khi input thay đổi
+        chatInput.addEventListener('input', () => {
+            if (chatInput.value.trim()) {
+                if (chatPrompts) chatPrompts.style.display = 'none';
+            } else {
+                if (chatMessages.children.length <= 1 && chatPrompts) {
+                    chatPrompts.style.display = 'block';
+                }
+            }
+        });
+
+        chatInput.addEventListener('focus', () => {
+            if (!chatInput.value.trim() && chatMessages.children.length <= 1 && chatPrompts) {
+                chatPrompts.style.display = 'block';
+            }
         });
 
         modal.querySelector('.chat-close-btn').addEventListener('click', () => {
@@ -1052,6 +1131,73 @@ const Widgets = {
                 text-align: left;
             }
 
+            .chat-prompts {
+                padding: 15px 20px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                background: rgba(255, 255, 255, 0.03);
+                animation: slideUp 0.3s ease;
+            }
+
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .prompts-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 12px;
+                color: rgba(255, 255, 255, 0.7);
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .prompts-header i {
+                color: var(--primary-color, #6366f1);
+            }
+
+            .prompts-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .prompt-btn {
+                padding: 8px 14px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                font-size: 13px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-family: inherit;
+            }
+
+            .prompt-btn:hover {
+                background: rgba(99, 102, 241, 0.2);
+                border-color: var(--primary-color, #6366f1);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+            }
+
+            .prompt-btn i {
+                font-size: 12px;
+                opacity: 0.8;
+            }
+
             .chat-input-form {
                 padding: 15px 20px;
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -1128,6 +1274,36 @@ const Widgets = {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    },
+
+    // ==================== CHAT HISTORY MANAGEMENT ====================
+    // Hàm để CS truy xuất lịch sử chat
+    getChatHistory() {
+        return JSON.parse(localStorage.getItem('chatHistory') || '[]');
+    },
+
+    // Lọc chat history theo prompt key
+    getChatHistoryByKey(promptKey) {
+        const history = this.getChatHistory();
+        return history.filter(item => item.promptKey === promptKey);
+    },
+
+    // Xóa lịch sử chat
+    clearChatHistory() {
+        localStorage.removeItem('chatHistory');
+    },
+
+    // Xuất chat history dưới dạng JSON
+    exportChatHistory() {
+        const history = this.getChatHistory();
+        const dataStr = JSON.stringify(history, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `chat-history-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
     },
 
     // ==================== VISITOR COUNTER ====================
