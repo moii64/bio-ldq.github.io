@@ -86,6 +86,14 @@ test-*.js
 *.test.js
 *.spec.js
 
+# Documentation files (keep only README.md)
+md/
+*.md
+!README.md
+!react-app/README.md
+
 # Local development files
 FILES-TO-UPLOAD.txt
+IMPROVEMENTS.md
+data-validation-report.md
 
