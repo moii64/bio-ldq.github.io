@@ -86,6 +86,22 @@ test-*.js
 *.test.js
 *.spec.js
 
+# Utility/Setup scripts (not needed in production)
+*-setup*.js
+setup-*.js
+auto-setup-*.js
+check-*.js
+copy-*.js
+run-sql*.js
+execute-sql.js
+create-tables-*.js
+delete-*.js
+upload-*.js
+seed-*.js
+clear-*.js
+reset-*.js
+run-sql-*.js
+
 # Documentation files (keep only README.md)
 md/
 *.md
