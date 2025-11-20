@@ -684,12 +684,12 @@
                 
                 if (result.success) {
                     // Track successful login
-                    if (typeof Analytics !== 'undefined' && typeof Analytics.log === 'function') {
-                        try {
+                    try {
+                        if (typeof Analytics !== 'undefined' && Analytics && typeof Analytics.log === 'function') {
                             Analytics.log('auth', { type: 'login_success', timestamp: new Date().toISOString() });
-                        } catch (e) {
-                            console.warn('Analytics.log error:', e);
                         }
+                    } catch (e) {
+                        console.warn('Analytics.log error:', e);
                     }
                     
                     if (typeof Utils !== 'undefined' && Utils.Toast) {
@@ -703,12 +703,12 @@
                     }, 1000);
                 } else {
                     // Track failed login
-                    if (typeof Analytics !== 'undefined' && typeof Analytics.log === 'function') {
-                        try {
+                    try {
+                        if (typeof Analytics !== 'undefined' && Analytics && typeof Analytics.log === 'function') {
                             Analytics.log('auth', { type: 'login_failed', reason: result.message, timestamp: new Date().toISOString() });
-                        } catch (e) {
-                            console.warn('Analytics.log error:', e);
                         }
+                    } catch (e) {
+                        console.warn('Analytics.log error:', e);
                     }
                     
                     const errorMsg = result.message || 'Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin.';

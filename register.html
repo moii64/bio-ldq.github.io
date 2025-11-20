@@ -878,15 +878,15 @@
 
                 if (result.success) {
                     // Track successful registration
-                    if (typeof Analytics !== 'undefined' && typeof Analytics.log === 'function') {
-                        try {
+                    try {
+                        if (typeof Analytics !== 'undefined' && Analytics && typeof Analytics.log === 'function') {
                             Analytics.log('auth', {
                                 type: 'register_success',
                                 timestamp: new Date().toISOString()
                             });
-                        } catch (e) {
-                            console.warn('Analytics.log error:', e);
                         }
+                    } catch (e) {
+                        console.warn('Analytics.log error:', e);
                     }
 
                     // Check if auto-login was successful
@@ -915,16 +915,16 @@
                     }
                 } else {
                     // Track failed registration
-                    if (typeof Analytics !== 'undefined' && typeof Analytics.log === 'function') {
-                        try {
+                    try {
+                        if (typeof Analytics !== 'undefined' && Analytics && typeof Analytics.log === 'function') {
                             Analytics.log('auth', {
                                 type: 'register_failed',
                                 reason: result.message,
                                 timestamp: new Date().toISOString()
                             });
-                        } catch (e) {
-                            console.warn('Analytics.log error:', e);
                         }
+                    } catch (e) {
+                        console.warn('Analytics.log error:', e);
                     }
 
                     const errorMsg = result.message || 'Đăng ký thất bại! Vui lòng thử lại.';
