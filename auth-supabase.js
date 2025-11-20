@@ -391,17 +391,29 @@ const Auth = {
         if (this.isSupabaseAvailable()) {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('username')
-                    .eq('id', session.user.id)
-                    .single();
+                // Try to get username from profile, but don't fail if profile doesn't exist
+                let username = session.user.user_metadata?.username || session.user.email?.split('@')[0] || 'user';
+                
+                try {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('username')
+                        .eq('id', session.user.id)
+                        .maybeSingle();
+                    
+                    if (profile && profile.username) {
+                        username = profile.username;
+                    }
+                } catch (error) {
+                    // Ignore error, use fallback username
+                    console.warn('Could not fetch username from profile:', error);
+                }
 
                 return {
                     userId: session.user.id,
-                    username: profile?.username || session.user.user_metadata?.username || session.user.email,
+                    username: username,
                     email: session.user.email,
-                    loginTime: session.user.created_at,
+                    loginTime: session.user.created_at || new Date().toISOString(),
                     rememberMe: true
                 };
             }
