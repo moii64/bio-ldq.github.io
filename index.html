@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <title>Bio Link - Danh sách nhiệm vụ</title>
     <meta name="description" content="Trang bio link hiện đại với danh sách nhiệm vụ và chuyển đổi giao diện">
+    <meta name="keywords" content="bio link, link in bio, social links, task management, profile page">
+    <meta name="author" content="Bio Link">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Vietnamese">
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
@@ -20,6 +24,8 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="assistive-touch.css">
     <link rel="stylesheet" href="hide-seasonal-panel.css">
+    <link rel="stylesheet" href="improvements.css">
+    <link rel="stylesheet" href="responsive-improvements.css">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -37,9 +43,30 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Bio Link - Danh sách nhiệm vụ">
     <meta name="twitter:description" content="Trang bio link hiện đại với danh sách nhiệm vụ và chuyển đổi giao diện">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Bio Link",
+        "description": "Trang bio link hiện đại với danh sách nhiệm vụ và chuyển đổi giao diện",
+        "url": "https://moii64.github.io/bio-ldq.github.io/",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "Web",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "VND"
+        }
+    }
+    </script>
 </head>
 
 <body>
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link">Bỏ qua đến nội dung chính</a>
+
     <!-- Theme Selector -->
     <div class="theme-selector">
         <button class="theme-btn active" data-theme="gradient" title="Gradient Theme">
@@ -81,7 +108,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="container" id="main-content">
         <!-- Profile Section -->
         <div class="profile-section">
             <div class="profile-image" id="profileImage">
@@ -424,6 +451,20 @@
     </div>
 
     <!-- Scripts -->
+    <!-- Utility functions (load first) -->
+    <script src="utils.js"></script>
+    <!-- Analytics -->
+    <script src="analytics.js"></script>
+    <!-- Search functionality -->
+    <script src="search.js"></script>
+    <!-- Data Manager -->
+    <script src="data-manager.js"></script>
+    <!-- PWA Enhancer -->
+    <script src="pwa-enhancer.js"></script>
+    <!-- Theme Toggle -->
+    <script src="theme-toggle.js"></script>
+    <!-- Help System -->
+    <script src="help-system.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B8k8R3tDTM7/OJdGIf8Nw0AC6LrK6EoFJ8yTp3JMWMUpPk9S4VrDtCInzaY5bq5Z4b5ZY1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- Load Supabase config (optional - falls back to defaults in auth-supabase.js) -->
     <script src="config.js" onerror="console.warn('config.js not found, using defaults')"></script>
@@ -776,6 +817,12 @@
         // Initialize task manager when DOM is loaded
         let taskManager;
         document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize utilities
+            if (typeof Utils !== 'undefined') {
+                Utils.preloadResources();
+                Utils.lazyLoadImages();
+            }
+
             // Wait for Auth to be loaded first
             if (typeof window.waitForAuth === 'function') {
                 await window.waitForAuth(3000);

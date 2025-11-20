@@ -560,6 +560,12 @@
         </div>
     </div>
 
+    <!-- Utility functions -->
+    <script src="utils.js"></script>
+    <!-- Form validator -->
+    <script src="form-validator.js"></script>
+    <!-- Analytics -->
+    <script src="analytics.js"></script>
     <!-- Load Supabase config (optional - falls back to defaults in auth-supabase.js) -->
     <script src="config.js"></script>
     <!-- Using Supabase for authentication (falls back to localStorage if not configured) -->
@@ -668,8 +674,25 @@
             return { level: Math.min(strength, 4), text, color };
         }
 
-        // Form validation
+        // Initialize form validator
         const registerForm = document.getElementById('registerForm');
+        const validator = new FormValidator(registerForm);
+        
+        // Add validation rules
+        validator.addRule('username', FormValidator.rules.required, 'Vui lòng nhập tên đăng nhập');
+        validator.addRule('username', FormValidator.rules.minLength(3), 'Tên đăng nhập phải có ít nhất 3 ký tự');
+        validator.addRule('username', FormValidator.rules.maxLength(20), 'Tên đăng nhập không được quá 20 ký tự');
+        validator.addRule('email', FormValidator.rules.required, 'Vui lòng nhập email');
+        validator.addRule('email', FormValidator.rules.email, 'Email không hợp lệ');
+        validator.addRule('password', FormValidator.rules.required, 'Vui lòng nhập mật khẩu');
+        validator.addRule('password', FormValidator.rules.password, 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số');
+        validator.addRule('confirmPassword', FormValidator.rules.required, 'Vui lòng xác nhận mật khẩu');
+        validator.addRule('confirmPassword', (value, field) => {
+            const password = document.getElementById('password').value;
+            return value === password;
+        }, 'Mật khẩu xác nhận không khớp');
+
+        // Form validation
         const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
         const submitButton = document.getElementById('submitButton');
@@ -791,12 +814,32 @@
                 const result = await Auth.register(username, email, password);
                 
                 if (result.success) {
-                    showSuccess('Đăng ký thành công! Đang chuyển hướng...');
+                    // Track successful registration
+                    if (typeof Analytics !== 'undefined') {
+                        Analytics.log('auth', { type: 'register_success', timestamp: new Date().toISOString() });
+                    }
+                    
+                    if (typeof Utils !== 'undefined' && Utils.Toast) {
+                        Utils.Toast.success('Đăng ký thành công!', 'Đang chuyển hướng...');
+                    } else {
+                        showSuccess('Đăng ký thành công! Đang chuyển hướng...');
+                    }
+                    
                     setTimeout(() => {
                         window.location.href = 'login.html';
                     }, 1500);
                 } else {
-                    showError(result.message || 'Đăng ký thất bại! Vui lòng thử lại.');
+                    // Track failed registration
+                    if (typeof Analytics !== 'undefined') {
+                        Analytics.log('auth', { type: 'register_failed', reason: result.message, timestamp: new Date().toISOString() });
+                    }
+                    
+                    const errorMsg = result.message || 'Đăng ký thất bại! Vui lòng thử lại.';
+                    if (typeof Utils !== 'undefined' && Utils.Toast) {
+                        Utils.Toast.error(errorMsg);
+                    } else {
+                        showError(errorMsg);
+                    }
                     submitButton.disabled = false;
                     submitButton.innerHTML = '<i class="fas fa-user-plus"></i> Đăng Ký';
                 }
