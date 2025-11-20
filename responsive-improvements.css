@@ -1,0 +1,260 @@
+/**
+ * Responsive Design Improvements
+ */
+
+/* ==================== MOBILE FIRST ==================== */
+
+/* Better touch targets on mobile */
+@media (max-width: 768px) {
+    /* Increase touch target size */
+    button,
+    a,
+    input[type="button"],
+    input[type="submit"],
+    .link-card,
+    .task-item {
+        min-height: 48px;
+        min-width: 48px;
+    }
+
+    /* Better spacing */
+    .container {
+        padding: 12px;
+    }
+
+    /* Stack elements vertically */
+    .auth-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .user-menu {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Theme selector adjustments */
+    .theme-selector {
+        top: 10px;
+        right: 10px;
+        flex-wrap: wrap;
+        max-width: calc(100% - 20px);
+    }
+
+    .theme-btn,
+    .search-button,
+    .theme-toggle-btn,
+    .help-button,
+    .pwa-install-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    /* Profile section */
+    .profile-section {
+        padding: 20px 0;
+    }
+
+    .profile-image {
+        width: 100px;
+        height: 100px;
+    }
+
+    /* Links container */
+    .links-container {
+        gap: 12px;
+    }
+
+    .link-card {
+        padding: 16px;
+    }
+
+    /* Task section */
+    .task-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .task-filters {
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        flex: 1;
+        min-width: 100px;
+    }
+
+    /* Forms */
+    .login-card,
+    .register-card {
+        padding: 30px 20px;
+    }
+
+    /* Guest message */
+    .guest-card {
+        padding: 30px 20px;
+    }
+
+    .guest-actions {
+        flex-direction: column;
+    }
+
+    .guest-btn {
+        width: 100%;
+    }
+}
+
+/* ==================== TABLET ==================== */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        max-width: 600px;
+    }
+
+    .theme-selector {
+        top: 15px;
+        right: 15px;
+    }
+}
+
+/* ==================== LARGE SCREENS ==================== */
+
+@media (min-width: 1440px) {
+    .container {
+        max-width: 800px;
+    }
+}
+
+/* ==================== LANDSCAPE ORIENTATION ==================== */
+
+@media (orientation: landscape) and (max-height: 600px) {
+    .profile-section {
+        padding: 10px 0;
+    }
+
+    .profile-image {
+        width: 80px;
+        height: 80px;
+    }
+
+    .theme-selector {
+        top: 5px;
+        right: 5px;
+        padding: 5px;
+    }
+}
+
+/* ==================== HIGH DPI DISPLAYS ==================== */
+
+@media (-webkit-min-device-pixel-ratio: 2),
+       (min-resolution: 192dpi) {
+    /* Sharper borders and shadows */
+    .link-card,
+    .task-item,
+    .login-card {
+        border-width: 0.5px;
+    }
+}
+
+/* ==================== REDUCED MOTION ==================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ==================== PRINT STYLES ==================== */
+
+@media print {
+    .theme-selector,
+    .auth-buttons,
+    .search-button,
+    .theme-toggle-btn,
+    .help-button,
+    .pwa-install-btn,
+    button:not(.print-keep),
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+        color: black;
+    }
+
+    .link-card,
+    .task-item {
+        border: 1px solid #000;
+        page-break-inside: avoid;
+    }
+}
+
+/* ==================== FOCUS VISIBLE FOR KEYBOARD NAVIGATION ==================== */
+
+@media (prefers-reduced-motion: no-preference) {
+    *:focus-visible {
+        outline: 2px solid #64c8ff;
+        outline-offset: 2px;
+        border-radius: 4px;
+        animation: focusPulse 0.3s ease;
+    }
+
+    @keyframes focusPulse {
+        0% {
+            outline-width: 2px;
+        }
+        50% {
+            outline-width: 4px;
+        }
+        100% {
+            outline-width: 2px;
+        }
+    }
+}
+
+/* ==================== CONTAINER QUERIES (if supported) ==================== */
+
+@container (max-width: 400px) {
+    .link-card {
+        padding: 12px;
+    }
+}
+
+/* ==================== SAFE AREA INSETS (for notched devices) ==================== */
+
+@supports (padding: max(0px)) {
+    body {
+        padding-left: max(12px, env(safe-area-inset-left));
+        padding-right: max(12px, env(safe-area-inset-right));
+        padding-top: max(12px, env(safe-area-inset-top));
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+
+    .theme-selector {
+        top: max(20px, env(safe-area-inset-top));
+        right: max(20px, env(safe-area-inset-right));
+    }
+}
+
+/* ==================== DARK MODE RESPONSIVE ==================== */
+
+@media (prefers-color-scheme: dark) {
+    /* Already dark by default, but can add specific adjustments */
+}
+
+/* ==================== LIGHT MODE RESPONSIVE ==================== */
+
+@media (prefers-color-scheme: light) {
+    [data-theme="light"] .link-card {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+}
+
