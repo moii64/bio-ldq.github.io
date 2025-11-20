@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Ký - Bio Link</title>
     <meta name="description" content="Tạo tài khoản Bio Link mới">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         * {
             margin: 0;
@@ -59,6 +59,7 @@
             0% {
                 transform: translateX(-100%);
             }
+
             100% {
                 transform: translateX(100vw);
             }
@@ -96,15 +97,20 @@
         }
 
         @keyframes float {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translate(0, 0) scale(1);
             }
+
             25% {
                 transform: translate(20px, -30px) scale(1.1);
             }
+
             50% {
                 transform: translate(-15px, 20px) scale(0.9);
             }
+
             75% {
                 transform: translate(30px, 15px) scale(1.05);
             }
@@ -182,9 +188,12 @@
         }
 
         @keyframes shimmer {
-            0%, 100% {
+
+            0%,
+            100% {
                 opacity: 0.5;
             }
+
             50% {
                 opacity: 1;
             }
@@ -195,6 +204,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -441,9 +451,19 @@
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
         }
 
         .success-message {
@@ -634,7 +654,7 @@
         passwordInput.addEventListener('input', () => {
             const password = passwordInput.value;
             const strength = calculatePasswordStrength(password);
-            
+
             strengthBars.forEach((bar, index) => {
                 bar.classList.remove('active');
                 if (index < strength.level) {
@@ -644,7 +664,7 @@
                     bar.style.background = '';
                 }
             });
-            
+
             strengthText.textContent = strength.text;
             strengthText.style.color = strength.color;
         });
@@ -671,13 +691,17 @@
                 color = '#86efac';
             }
 
-            return { level: Math.min(strength, 4), text, color };
+            return {
+                level: Math.min(strength, 4),
+                text,
+                color
+            };
         }
 
         // Initialize form validator (wait for FormValidator to be available)
         const registerForm = document.getElementById('registerForm');
         let validator = null;
-        
+
         // Wait for FormValidator to be available
         if (typeof FormValidator !== 'undefined') {
             try {
@@ -728,17 +752,17 @@
 
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             // Get and sanitize input
             let username = document.getElementById('username').value.trim();
             let email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value; // Don't trim password
             const confirmPassword = document.getElementById('confirmPassword').value;
             const agreeTerms = document.getElementById('agreeTerms').checked;
-            
+
             // Sanitize username - only allow alphanumeric, underscore, and hyphen
             username = username.replace(/[^a-zA-Z0-9_-]/g, '');
-            
+
             // Sanitize email
             if (typeof Utils !== 'undefined' && Utils.escapeHTML) {
                 email = Utils.escapeHTML(email).toLowerCase();
@@ -747,13 +771,13 @@
                 // Basic HTML escaping
                 email = email.replace(/[<>]/g, '');
             }
-            
+
             // Validate username format after sanitization
             if (username.length < 3 || username.length > 20) {
                 showError('Tên đăng nhập phải từ 3-20 ký tự và chỉ chứa chữ cái, số, dấu gạch dưới và dấu gạch ngang!');
                 return;
             }
-            
+
             if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
                 showError('Tên đăng nhập chỉ được chứa chữ cái, số, dấu gạch dưới và dấu gạch ngang!');
                 return;
@@ -808,11 +832,11 @@
             try {
                 // Wait for Auth with retry mechanism
                 submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải hệ thống...';
-                
+
                 let authLoaded = false;
                 let retryCount = 0;
                 const maxRetries = 20;
-                
+
                 while (!authLoaded && retryCount < maxRetries) {
                     if (typeof Auth !== 'undefined') {
                         authLoaded = true;
@@ -821,7 +845,7 @@
                     await new Promise(resolve => setTimeout(resolve, 100));
                     retryCount++;
                 }
-                
+
                 if (!authLoaded) {
                     showError('Hệ thống xác thực chưa được tải. Vui lòng tải lại trang (F5) và thử lại.');
                     submitButton.disabled = false;
@@ -831,7 +855,7 @@
 
                 // Wait for Auth to be ready
                 submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang khởi tạo...';
-                
+
                 if (typeof Auth.isReady === 'function') {
                     const isReady = await Auth.isReady(3000);
                     if (!isReady) {
@@ -851,13 +875,20 @@
 
                 // Auth.register is async with Supabase
                 const result = await Auth.register(username, email, password);
-                
+
                 if (result.success) {
                     // Track successful registration
-                    if (typeof Analytics !== 'undefined') {
-                        Analytics.log('auth', { type: 'register_success', timestamp: new Date().toISOString() });
+                    if (typeof Analytics !== 'undefined' && typeof Analytics.log === 'function') {
+                        try {
+                            Analytics.log('auth', {
+                                type: 'register_success',
+                                timestamp: new Date().toISOString()
+                            });
+                        } catch (e) {
+                            console.warn('Analytics.log error:', e);
+                        }
                     }
-                    
+
                     // Check if auto-login was successful
                     if (result.autoLogin) {
                         if (typeof Utils !== 'undefined' && Utils.Toast) {
@@ -865,7 +896,7 @@
                         } else {
                             showSuccess('Đăng ký và đăng nhập thành công! Đang chuyển hướng...');
                         }
-                        
+
                         // Redirect to home page
                         setTimeout(() => {
                             window.location.href = 'index.html';
@@ -876,7 +907,7 @@
                         } else {
                             showSuccess(result.message || 'Đăng ký thành công! Vui lòng đăng nhập.');
                         }
-                        
+
                         // Redirect to login page
                         setTimeout(() => {
                             window.location.href = 'login.html';
@@ -884,10 +915,18 @@
                     }
                 } else {
                     // Track failed registration
-                    if (typeof Analytics !== 'undefined') {
-                        Analytics.log('auth', { type: 'register_failed', reason: result.message, timestamp: new Date().toISOString() });
+                    if (typeof Analytics !== 'undefined' && typeof Analytics.log === 'function') {
+                        try {
+                            Analytics.log('auth', {
+                                type: 'register_failed',
+                                reason: result.message,
+                                timestamp: new Date().toISOString()
+                            });
+                        } catch (e) {
+                            console.warn('Analytics.log error:', e);
+                        }
                     }
-                    
+
                     const errorMsg = result.message || 'Đăng ký thất bại! Vui lòng thử lại.';
                     if (typeof Utils !== 'undefined' && Utils.Toast) {
                         Utils.Toast.error(errorMsg);
@@ -932,4 +971,3 @@
 </body>
 
 </html>
-
