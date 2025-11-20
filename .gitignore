@@ -81,6 +81,11 @@ coverage/
 debug-*.js
 *.debug.js
 
+# Test files
+test-*.js
+*.test.js
+*.spec.js
+
 # Local development files
 FILES-TO-UPLOAD.txt
 
