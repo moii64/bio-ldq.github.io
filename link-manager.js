@@ -369,6 +369,21 @@ class LinkManager {
 
     saveLinks() {
         localStorage.setItem('bioLinkCards', JSON.stringify(this.links));
+        
+        // Trigger sync to Supabase if available
+        if (typeof window !== 'undefined') {
+            // Update user data in Auth
+            if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
+                const user = await Auth.getCurrentUser();
+                if (user) {
+                    user.links = this.links;
+                    // Trigger sync event
+                    document.dispatchEvent(new CustomEvent('userDataChanged', {
+                        detail: { type: 'links', data: this.links }
+                    }));
+                }
+            }
+        }
     }
 
     addManageButtonStyles() {

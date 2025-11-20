@@ -470,6 +470,8 @@
     <script src="config.js" onerror="console.warn('config.js not found, using defaults')"></script>
     <!-- Using Supabase for authentication (falls back to localStorage if not configured) -->
     <script src="auth-supabase.js" onerror="console.error('Failed to load auth-supabase.js')"></script>
+    <!-- Supabase Data Sync Service -->
+    <script src="supabase-sync.js"></script>
     <!-- Auth Ready Checker - ensures Auth is loaded before allowing form submission -->
     <script>
         // Global Auth ready checker with auto-retry
@@ -785,8 +787,20 @@
                 document.getElementById('pendingTasks').textContent = pending;
             }
 
-            saveTasks() {
+            async saveTasks() {
                 localStorage.setItem('bioLinkTasks', JSON.stringify(this.tasks));
+                
+                // Trigger sync to Supabase if available
+                if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
+                    const user = await Auth.getCurrentUser();
+                    if (user) {
+                        user.tasks = this.tasks;
+                        // Trigger sync event
+                        document.dispatchEvent(new CustomEvent('userDataChanged', {
+                            detail: { type: 'tasks', data: this.tasks }
+                        }));
+                    }
+                }
             }
 
             getPriorityText(priority) {

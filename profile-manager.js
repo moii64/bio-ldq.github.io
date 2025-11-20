@@ -210,9 +210,21 @@ class ProfileManager {
         };
     }
 
-    saveProfileData() {
+    async saveProfileData() {
         const profileData = this.getProfileData();
         localStorage.setItem('bioLinkProfile', JSON.stringify(profileData));
+        
+        // Trigger sync to Supabase if available
+        if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
+            const user = await Auth.getCurrentUser();
+            if (user) {
+                user.profile = profileData;
+                // Trigger sync event
+                document.dispatchEvent(new CustomEvent('userDataChanged', {
+                    detail: { type: 'profile', data: profileData }
+                }));
+            }
+        }
     }
 
     loadProfileData() {
