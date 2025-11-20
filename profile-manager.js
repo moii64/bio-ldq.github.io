@@ -9,7 +9,16 @@ class ProfileManager {
         this.profileBioEl = document.querySelector('.profile-bio');
         this.socialLinksEl = document.querySelector('.social-links');
         
+        // Load profile data (from Supabase if available, else localStorage)
         this.loadProfileData();
+        
+        // Listen for data loaded from Supabase
+        window.addEventListener('dataLoadedFromSupabase', (e) => {
+            if (e.detail && e.detail.profile) {
+                this.loadProfileFromData(e.detail.profile);
+            }
+        });
+        
         this.init();
     }
 
@@ -137,7 +146,7 @@ class ProfileManager {
         return formHTML;
     }
 
-    saveSocialLinksFromForm(form) {
+    async saveSocialLinksFromForm(form) {
         const formData = new FormData(form);
         const socialData = {};
         
@@ -147,8 +156,29 @@ class ProfileManager {
             }
         }
         
+        // Save to localStorage first
         localStorage.setItem('bioLinkSocialLinks', JSON.stringify(socialData));
         this.renderSocialLinks();
+        
+        // Save to Supabase if available
+        if (window.DataSyncService && typeof Auth !== 'undefined' && Auth.isSupabaseAvailable && Auth.isSupabaseAvailable()) {
+            try {
+                const profileData = this.getProfileData();
+                const profileDataForSupabase = {
+                    profile: {
+                        name: profileData.name,
+                        bio: profileData.bio,
+                        image: '',
+                        socialLinks: socialData
+                    }
+                };
+                
+                await window.DataSyncService.saveProfileToSupabase(profileDataForSupabase);
+            } catch (error) {
+                console.error('Error saving social links to Supabase:', error);
+            }
+        }
+        
         this.showNotification('Đã cập nhật social links!', 'success');
     }
 
@@ -210,12 +240,63 @@ class ProfileManager {
         };
     }
 
-    saveProfileData() {
+    async saveProfileData() {
         const profileData = this.getProfileData();
+        const socialLinks = this.getSocialLinksData();
+        
+        // Save to localStorage first (always)
         localStorage.setItem('bioLinkProfile', JSON.stringify(profileData));
+        localStorage.setItem('bioLinkSocialLinks', JSON.stringify(socialLinks));
+        
+        // Save to Supabase if available
+        if (typeof Auth !== 'undefined' && Auth.isSupabaseAvailable && Auth.isSupabaseAvailable()) {
+            // Wait for DataSyncService to be ready
+            if (!window.DataSyncService) {
+                console.warn('DataSyncService chưa sẵn sàng, sẽ retry sau...');
+                setTimeout(() => this.saveProfileData(), 1000);
+                return;
+            }
+            
+            try {
+                const profileDataForSupabase = {
+                    profile: {
+                        name: profileData.name,
+                        bio: profileData.bio,
+                        image: '', // Will be updated separately if needed
+                        socialLinks: socialLinks
+                    }
+                };
+                
+                const success = await window.DataSyncService.saveProfileToSupabase(profileDataForSupabase);
+                if (success) {
+                    console.log('✅ Profile đã được lưu vào Supabase');
+                } else {
+                    console.warn('⚠️ Không thể lưu profile vào Supabase, đã lưu vào localStorage');
+                }
+            } catch (error) {
+                console.error('❌ Error saving profile to Supabase:', error);
+                // Continue - localStorage already saved
+            }
+        } else {
+            console.log('ℹ️ Supabase không available, chỉ lưu vào localStorage');
+        }
     }
 
-    loadProfileData() {
+    async loadProfileData() {
+        // Try to load from Supabase first if user is logged in
+        if (window.DataSyncService && typeof Auth !== 'undefined' && Auth.isSupabaseAvailable && Auth.isSupabaseAvailable()) {
+            try {
+                const data = await window.DataSyncService.loadProfileFromSupabase();
+                if (data && data.profile) {
+                    this.loadProfileFromData(data.profile);
+                    return; // Use Supabase data, skip localStorage
+                }
+            } catch (error) {
+                console.warn('Error loading from Supabase, using localStorage:', error);
+            }
+        }
+        
+        // Fallback to localStorage
         const saved = localStorage.getItem('bioLinkProfile');
         if (saved) {
             try {
@@ -229,6 +310,32 @@ class ProfileManager {
             } catch (e) {
                 console.warn('Could not load profile data:', e);
             }
+        }
+        
+        // Also load social links
+        const savedSocialLinks = localStorage.getItem('bioLinkSocialLinks');
+        if (savedSocialLinks) {
+            try {
+                const socialData = JSON.parse(savedSocialLinks);
+                if (Object.keys(socialData).length > 0) {
+                    // Social links are rendered separately
+                }
+            } catch (e) {
+                console.warn('Could not load social links:', e);
+            }
+        }
+    }
+
+    loadProfileFromData(profileData) {
+        if (profileData.name) {
+            this.profileNameEl.textContent = profileData.name;
+        }
+        if (profileData.bio) {
+            this.profileBioEl.textContent = profileData.bio;
+        }
+        if (profileData.socialLinks) {
+            localStorage.setItem('bioLinkSocialLinks', JSON.stringify(profileData.socialLinks));
+            this.renderSocialLinks();
         }
     }
 

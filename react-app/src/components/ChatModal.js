@@ -4,6 +4,7 @@ import React, {
     useEffect
 } from 'react';
 import './ChatModal.css';
+import supabase from '../supabaseClient';
 
 const ChatModal = ({
     onClose
@@ -17,6 +18,7 @@ const ChatModal = ({
     const [inputMessage, setInputMessage] = useState('');
     const [showPrompts, setShowPrompts] = useState(true);
     const messagesEndRef = useRef(null);
+    const [chatSessionId, setChatSessionId] = useState(null);
 
     // Các prompt mẫu với key để CS nhận dạng
     const samplePrompts = [{
@@ -117,6 +119,136 @@ const ChatModal = ({
         scrollToBottom();
     }, [messages]);
 
+    // Create chat session when component mounts
+    useEffect(() => {
+        createChatSession();
+        return () => {
+            // Close session when component unmounts
+            if (chatSessionId) {
+                closeChatSession(chatSessionId);
+            }
+        };
+    }, []);
+
+    // Create chat session in Supabase
+    const createChatSession = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            const sessionData = {
+                user_id: user?.id || null,
+                user_email: user?.email || null,
+                user_name: user?.user_metadata?.username || null,
+                session_status: 'active',
+                initial_message: null,
+                ip_address: null, // Can be added if needed
+                user_agent: navigator.userAgent,
+                device_info: {
+                    platform: navigator.platform,
+                    language: navigator.language
+                }
+            };
+
+            const { data, error } = await supabase
+                .from('chat_sessions')
+                .insert(sessionData)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Error creating chat session:', error);
+                return;
+            }
+
+            setChatSessionId(data.id);
+        } catch (error) {
+            console.error('Error creating chat session:', error);
+        }
+    };
+
+    // Close chat session
+    const closeChatSession = async (sessionId) => {
+        if (!sessionId) return;
+        
+        try {
+            await supabase
+                .from('chat_sessions')
+                .update({
+                    session_status: 'closed',
+                    closed_at: new Date().toISOString()
+                })
+                .eq('id', sessionId);
+        } catch (error) {
+            console.error('Error closing chat session:', error);
+        }
+    };
+
+    // Save message to Supabase
+    const saveMessageToSupabase = async (messageText, senderType, promptKey) => {
+        if (!chatSessionId) return;
+
+        try {
+            const messageData = {
+                session_id: chatSessionId,
+                sender_type: senderType,
+                message_text: messageText,
+                prompt_key: promptKey,
+                metadata: {}
+            };
+
+            const { error } = await supabase
+                .from('chat_messages')
+                .insert(messageData);
+
+            if (error) {
+                console.error('Error saving message to Supabase:', error);
+            }
+        } catch (error) {
+            console.error('Error saving message:', error);
+        }
+    };
+
+    // Update chat statistics
+    const updateChatStatistics = async (promptKey) => {
+        if (!promptKey || promptKey === 'CUSTOM') return;
+
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Try to update existing record
+            const { data: existing } = await supabase
+                .from('chat_statistics')
+                .select('*')
+                .eq('date', today)
+                .eq('prompt_key', promptKey)
+                .single();
+
+            if (existing) {
+                // Update existing
+                await supabase
+                    .from('chat_statistics')
+                    .update({
+                        total_sessions: existing.total_sessions + 1,
+                        total_messages: existing.total_messages + 1,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', existing.id);
+            } else {
+                // Insert new
+                await supabase
+                    .from('chat_statistics')
+                    .insert({
+                        date: today,
+                        prompt_key: promptKey,
+                        total_sessions: 1,
+                        total_messages: 1
+                    });
+            }
+        } catch (error) {
+            console.error('Error updating chat statistics:', error);
+        }
+    };
+
     const handleSend = (e) => {
         e.preventDefault();
         if (!inputMessage.trim()) return;
@@ -152,7 +284,22 @@ const ChatModal = ({
         setInputMessage('');
         setShowPrompts(false);
 
-        // Lưu vào localStorage để CS truy xuất
+        // Save to Supabase
+        saveMessageToSupabase(inputMessage, 'user', promptKey);
+        updateChatStatistics(promptKey);
+
+        // Update session with initial message if first user message
+        if (messages.length === 1 && chatSessionId) {
+            supabase
+                .from('chat_sessions')
+                .update({
+                    initial_message: inputMessage,
+                    prompt_key: promptKey
+                })
+                .eq('id', chatSessionId);
+        }
+
+        // Lưu vào localStorage để CS truy xuất (fallback)
         const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
         chatHistory.push({
             message: inputMessage,
@@ -171,7 +318,11 @@ const ChatModal = ({
                 sender: 'ai',
                 timestamp: new Date()
             };
-            setMessages(prev => [...prev, aiResponse]);
+            setMessages(prev => {
+                // Save AI response to Supabase
+                saveMessageToSupabase(aiResponseText, 'ai', promptKey);
+                return [...prev, aiResponse];
+            });
         }, delay);
     };
 

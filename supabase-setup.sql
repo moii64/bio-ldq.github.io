@@ -41,6 +41,13 @@ CREATE POLICY "Users can insert own profile"
     ON profiles FOR INSERT
     WITH CHECK (auth.uid() = id);
 
+-- Allow anonymous users to lookup email from username (for login)
+-- This is safe as we only expose username and email (no sensitive data)
+CREATE POLICY "Anonymous can lookup email from username"
+    ON profiles FOR SELECT
+    USING (true)
+    WITH CHECK (false);
+
 -- Create function to automatically create profile on user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$

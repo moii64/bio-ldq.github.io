@@ -14,6 +14,7 @@
     "run:sql": "node run-sql-now.js",
     "copy:sql": "node copy-sql-to-clipboard.js",
     "exec:sql": "node execute-sql.js",
+    "seed:db": "node seed-database.js",
     "clean:md": "node delete-md-files.js"
   },
   "keywords": [

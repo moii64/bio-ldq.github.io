@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- CropperJS CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha512-hvLV0+y52jz63jJVPgDYlBdp3T8aVPGJWh+CkrVd031Lo54kf9AoURU0VFFy4iQ5D9rRcFyWfXaJF5eS0mum8w==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
     <!-- Main styles -->
     <link rel="stylesheet" href="styles.css">
@@ -31,7 +31,7 @@
     <meta property="og:title" content="Bio Link - Danh sách nhiệm vụ">
     <meta property="og:description" content="Trang bio link hiện đại với danh sách nhiệm vụ và chuyển đổi giao diện">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="https://via.placeholder.com/1200x630/6366f1/ffffff?text=Bio+Link">
+    <meta property="og:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='630'%3E%3Crect fill='%236366f1' width='1200' height='630'/%3E%3Ctext fill='%23ffffff' font-family='Arial' font-size='72' font-weight='bold' x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle'%3EBio Link%3C/text%3E%3C/svg%3E">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
@@ -85,7 +85,7 @@
         <!-- Profile Section -->
         <div class="profile-section">
             <div class="profile-image" id="profileImage">
-                <img src="https://via.placeholder.com/140x140/6366f1/ffffff?text=👤" alt="Profile" id="profileImg">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Crect fill='%236366f1' width='140' height='140'/%3E%3Ctext fill='%23ffffff' font-family='Arial' font-size='80' x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle'%3E👤%3C/text%3E%3C/svg%3E" alt="Profile" id="profileImg">
                 <div class="profile-img-overlay">
                     <i class="fas fa-camera"></i>
                     <span>Thay đổi ảnh</span>
@@ -424,11 +424,14 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B8k8R3tDTM7/OJdGIf8Nw0AC6LrK6EoFJ8yTp3JMWMUpPk9S4VrDtCInzaY5bq5Z4b5ZY1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- Load Supabase config (optional - falls back to defaults in auth-supabase.js) -->
     <script src="config.js" onerror="console.warn('config.js not found, using defaults')"></script>
     <!-- Using Supabase for authentication (falls back to localStorage if not configured) -->
     <script src="auth-supabase.js" onerror="console.error('Failed to load auth-supabase.js')"></script>
+    <script src="data-sync-service.js" onerror="console.warn('Failed to load data-sync-service.js')"></script>
+    <script src="debug-supabase-connection.js"></script>
+    <script src="test-supabase-save.js"></script>
     <!-- Auth Ready Checker - ensures Auth is loaded before allowing form submission -->
     <script>
         // Global Auth ready checker with auto-retry
@@ -503,10 +506,40 @@
                 this.currentFilter = 'all';
                 this.editingTaskId = null;
 
+                // Load tasks from Supabase if available
+                this.loadTasksFromSupabase();
+
+                // Listen for data loaded from Supabase
+                window.addEventListener('dataLoadedFromSupabase', (e) => {
+                    if (e.detail && e.detail.tasks) {
+                        this.tasks = e.detail.tasks;
+                        this.saveTasks(); // Update localStorage
+                        this.renderTasks();
+                        this.updateStats();
+                    }
+                });
+
                 // Thêm task AI Support nếu chưa có
                 this.addAISupportTaskIfNeeded();
 
                 this.init();
+            }
+
+            async loadTasksFromSupabase() {
+                // Try to load from Supabase first if user is logged in
+                if (window.DataSyncService && typeof Auth !== 'undefined' && Auth.isSupabaseAvailable && Auth.isSupabaseAvailable()) {
+                    try {
+                        const data = await window.DataSyncService.loadProfileFromSupabase();
+                        if (data && data.tasks && Array.isArray(data.tasks) && data.tasks.length > 0) {
+                            this.tasks = data.tasks;
+                            this.saveTasks(); // Update localStorage
+                            return; // Use Supabase data
+                        }
+                    } catch (error) {
+                        console.warn('Error loading tasks from Supabase, using localStorage:', error);
+                    }
+                }
+                // Fallback to localStorage (already loaded in constructor)
             }
 
             addAISupportTaskIfNeeded() {
@@ -527,12 +560,13 @@
                         createdAt: new Date().toISOString()
                     };
                     this.tasks.unshift(aiSupportTask);
-                    this.saveTasks();
-                    // Render lại ngay sau khi thêm task
-                    if (this.initialized) {
-                        this.renderTasks();
-                        this.updateStats();
-                    }
+                    this.saveTasks().then(() => {
+                        // Render lại ngay sau khi thêm task
+                        if (this.initialized) {
+                            this.renderTasks();
+                            this.updateStats();
+                        }
+                    });
                 }
             }
 
@@ -623,27 +657,28 @@
                     this.tasks.unshift(taskData);
                 }
 
-                this.saveTasks();
-                this.renderTasks();
-                this.updateStats();
-                this.hideTaskModal();
+                this.saveTasks().then(() => {
+                    this.renderTasks();
+                    this.updateStats();
+                    this.hideTaskModal();
+                });
             }
 
-            deleteTask(taskId) {
+            async deleteTask(taskId) {
                 if (confirm('Bạn có chắc chắn muốn xóa nhiệm vụ này?')) {
                     this.tasks = this.tasks.filter(t => t.id !== taskId);
-                    this.saveTasks();
+                    await this.saveTasks();
                     this.renderTasks();
                     this.updateStats();
                 }
             }
 
-            toggleTask(taskId) {
+            async toggleTask(taskId) {
                 const task = this.tasks.find(t => t.id === taskId);
                 if (task) {
                     task.completed = !task.completed;
                     task.completedAt = task.completed ? new Date().toISOString() : null;
-                    this.saveTasks();
+                    await this.saveTasks();
                     this.renderTasks();
                     this.updateStats();
                 }
@@ -744,8 +779,33 @@
                 document.getElementById('pendingTasks').textContent = pending;
             }
 
-            saveTasks() {
+            async saveTasks() {
+                // Save to localStorage first (always)
                 localStorage.setItem('bioLinkTasks', JSON.stringify(this.tasks));
+
+                // Save to Supabase if available
+                if (typeof Auth !== 'undefined' && Auth.isSupabaseAvailable && Auth.isSupabaseAvailable()) {
+                    // Wait for DataSyncService to be ready
+                    if (!window.DataSyncService) {
+                        console.warn('DataSyncService chưa sẵn sàng, sẽ retry sau...');
+                        setTimeout(() => this.saveTasks(), 1000);
+                        return;
+                    }
+
+                    try {
+                        const success = await window.DataSyncService.saveTasksToSupabase(this.tasks);
+                        if (success) {
+                            console.log('✅ Tasks đã được lưu vào Supabase');
+                        } else {
+                            console.warn('⚠️ Không thể lưu tasks vào Supabase, đã lưu vào localStorage');
+                        }
+                    } catch (error) {
+                        console.error('❌ Error saving tasks to Supabase:', error);
+                        // Continue - localStorage already saved
+                    }
+                } else {
+                    console.log('ℹ️ Supabase không available, chỉ lưu vào localStorage');
+                }
             }
 
             getPriorityText(priority) {
@@ -813,9 +873,22 @@
             initRegisterModal();
 
             // Listen for auth ready event
-            window.addEventListener('authReady', () => {
+            window.addEventListener('authReady', async () => {
                 console.log('Auth ready event received');
                 checkAuthStatus();
+
+                // Load data from Supabase if user is logged in
+                if (window.DataSyncService && typeof Auth !== 'undefined') {
+                    try {
+                        const isLoggedIn = await Auth.isLoggedIn();
+                        if (isLoggedIn) {
+                            console.log('User logged in, loading data from Supabase...');
+                            await window.DataSyncService.loadAllFromSupabase();
+                        }
+                    } catch (error) {
+                        console.error('Error loading data from Supabase:', error);
+                    }
+                }
             });
 
             // Initialize crop modal event listeners
@@ -874,6 +947,15 @@
                 // User is logged in
                 const session = await Auth.getSession();
                 const user = await Auth.getCurrentUser();
+
+                // Load data from Supabase
+                if (window.DataSyncService) {
+                    try {
+                        await window.DataSyncService.loadAllFromSupabase();
+                    } catch (error) {
+                        console.error('Error loading data from Supabase:', error);
+                    }
+                }
 
                 if (loginBtn) loginBtn.style.display = 'none';
                 if (registerBtn) registerBtn.style.display = 'none';

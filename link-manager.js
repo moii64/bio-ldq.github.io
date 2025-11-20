@@ -8,7 +8,36 @@ class LinkManager {
         this.linksContainer = document.querySelector('.links-container');
         this.links = JSON.parse(localStorage.getItem('bioLinkCards') || '[]');
         
+        // Load links from Supabase if available
+        this.loadLinksFromSupabase();
+        
+        // Listen for data loaded from Supabase
+        window.addEventListener('dataLoadedFromSupabase', (e) => {
+            if (e.detail && e.detail.links) {
+                this.links = e.detail.links;
+                this.saveLinks(); // Update localStorage
+                this.renderLinks();
+            }
+        });
+        
         this.init();
+    }
+
+    async loadLinksFromSupabase() {
+        // Try to load from Supabase first if user is logged in
+        if (window.DataSyncService && typeof Auth !== 'undefined' && Auth.isSupabaseAvailable && Auth.isSupabaseAvailable()) {
+            try {
+                const data = await window.DataSyncService.loadProfileFromSupabase();
+                if (data && data.links && Array.isArray(data.links) && data.links.length > 0) {
+                    this.links = data.links;
+                    this.saveLinks(); // Update localStorage
+                    return; // Use Supabase data
+                }
+            } catch (error) {
+                console.warn('Error loading links from Supabase, using localStorage:', error);
+            }
+        }
+        // Fallback to localStorage (already loaded in constructor)
     }
 
     init() {
@@ -228,7 +257,7 @@ class LinkManager {
         `;
     }
 
-    saveLinkFromForm(form, linkId) {
+    async saveLinkFromForm(form, linkId) {
         const formData = new FormData(form);
         const linkData = {
             id: linkId || Date.now() + Math.random(),
@@ -250,16 +279,16 @@ class LinkManager {
             this.links.push(linkData);
         }
         
-        this.saveLinks();
+        await this.saveLinks();
         this.renderLinks();
         Widgets.showToast(linkId ? 'Đã cập nhật link!' : 'Đã thêm link mới!', 'success');
     }
 
-    deleteLink(linkId) {
+    async deleteLink(linkId) {
         if (!confirm('Bạn có chắc muốn xóa link này?')) return;
         
         this.links = this.links.filter(l => l.id !== linkId);
-        this.saveLinks();
+        await this.saveLinks();
         this.renderLinks();
         
         // Refresh manage modal
@@ -275,7 +304,7 @@ class LinkManager {
         this.showAddEditModal(linkId);
     }
 
-    moveLink(linkId, direction) {
+    async moveLink(linkId, direction) {
         const index = this.links.findIndex(l => l.id === linkId);
         if (index === -1) return;
         
@@ -287,7 +316,7 @@ class LinkManager {
             return;
         }
         
-        this.saveLinks();
+        await this.saveLinks();
         this.renderLinks();
         
         // Refresh manage modal
@@ -367,8 +396,33 @@ class LinkManager {
         });
     }
 
-    saveLinks() {
+    async saveLinks() {
+        // Save to localStorage first (always)
         localStorage.setItem('bioLinkCards', JSON.stringify(this.links));
+        
+        // Save to Supabase if available
+        if (typeof Auth !== 'undefined' && Auth.isSupabaseAvailable && Auth.isSupabaseAvailable()) {
+            // Wait for DataSyncService to be ready
+            if (!window.DataSyncService) {
+                console.warn('DataSyncService chưa sẵn sàng, sẽ retry sau...');
+                setTimeout(() => this.saveLinks(), 1000);
+                return;
+            }
+            
+            try {
+                const success = await window.DataSyncService.saveLinksToSupabase(this.links);
+                if (success) {
+                    console.log('✅ Links đã được lưu vào Supabase');
+                } else {
+                    console.warn('⚠️ Không thể lưu links vào Supabase, đã lưu vào localStorage');
+                }
+            } catch (error) {
+                console.error('❌ Error saving links to Supabase:', error);
+                // Continue - localStorage already saved
+            }
+        } else {
+            console.log('ℹ️ Supabase không available, chỉ lưu vào localStorage');
+        }
     }
 
     addManageButtonStyles() {

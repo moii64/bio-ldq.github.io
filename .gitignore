@@ -10,17 +10,23 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
+yarn.lock
 
 # Build outputs
 build/
 dist/
 *.min.js
 *.min.css
+.next/
+out/
 
 # Environment variables
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
 
 # IDE
 .vscode/
@@ -28,17 +34,53 @@ dist/
 *.swp
 *.swo
 *~
+*.sublime-project
+*.sublime-workspace
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
 
 # Logs
 logs/
 *.log
+indent.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
 # Temporary files
 tmp/
 temp/
 *.tmp
+*.cache
+.cache/
+
+# Test files (optional - uncomment to ignore)
+# test-*.js
+# *.test.js
+# *.spec.js
+# Uncomment the line below if you don't want to commit test files:
+# test-supabase-save.js
+
+# Database dumps and backups
+*.sql.backup
+*.db
+*.sqlite
+*.sqlite3
+
+# Coverage reports
+coverage/
+.nyc_output/
+*.lcov
+
+# Debug files
+debug-*.js
+*.debug.js
+
+# Local development files
+FILES-TO-UPLOAD.txt
 
