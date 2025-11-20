@@ -14,20 +14,31 @@ class FormValidator {
         // Add real-time validation
         this.form.querySelectorAll('input, textarea, select').forEach(field => {
             field.addEventListener('blur', () => this.validateField(field));
-            field.addEventListener('input', Utils.debounce(() => {
-                if (this.errors.has(field.name)) {
-                    this.validateField(field);
-                }
-            }, 300));
+            
+            // Only use Utils.debounce if available, otherwise use regular debounce
+            const debounceFn = (typeof Utils !== 'undefined' && Utils.debounce) 
+                ? Utils.debounce(() => {
+                    if (this.errors.has(field.name || field.id)) {
+                        this.validateField(field);
+                    }
+                }, 300)
+                : (() => {
+                    let timeout;
+                    return () => {
+                        clearTimeout(timeout);
+                        timeout = setTimeout(() => {
+                            if (this.errors.has(field.name || field.id)) {
+                                this.validateField(field);
+                            }
+                        }, 300);
+                    };
+                })();
+            
+            field.addEventListener('input', debounceFn);
         });
 
-        // Form submission
-        this.form.addEventListener('submit', (e) => {
-            if (!this.validate()) {
-                e.preventDefault();
-                this.showErrors();
-            }
-        });
+        // Note: We don't add submit handler here to avoid conflicts
+        // The submit handler should be added manually in the form's submit handler
     }
 
     addRule(fieldName, rule, message) {
@@ -39,7 +50,9 @@ class FormValidator {
 
     validateField(field) {
         const fieldName = field.name || field.id;
-        const value = field.value.trim();
+        if (!fieldName) return true; // Skip if no name/id
+        
+        const value = field.value ? field.value.trim() : '';
         const rules = this.rules.get(fieldName) || [];
 
         // Clear previous error
@@ -51,17 +64,26 @@ class FormValidator {
             return false;
         }
 
+        // Skip validation if field is empty and not required
+        if (!value && !field.hasAttribute('required')) {
+            return true;
+        }
+
         // Apply custom rules
         for (const { rule, message } of rules) {
-            if (!rule(value, field)) {
-                this.setFieldError(field, message);
-                return false;
+            try {
+                if (typeof rule === 'function' && !rule(value, field)) {
+                    this.setFieldError(field, message);
+                    return false;
+                }
+            } catch (error) {
+                console.warn('Validation rule error:', error);
             }
         }
 
         // HTML5 validation
-        if (!field.checkValidity()) {
-            this.setFieldError(field, field.validationMessage);
+        if (field.checkValidity && !field.checkValidity()) {
+            this.setFieldError(field, field.validationMessage || 'Giá trị không hợp lệ');
             return false;
         }
 
