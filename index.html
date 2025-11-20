@@ -425,13 +425,9 @@
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- Load Supabase config (optional - falls back to defaults in auth-supabase.js) -->
-    <script src="config.js" onerror="console.warn('config.js not found, using defaults')"></script>
     <!-- Using Supabase for authentication (falls back to localStorage if not configured) -->
     <script src="auth-supabase.js" onerror="console.error('Failed to load auth-supabase.js')"></script>
     <script src="data-sync-service.js" onerror="console.warn('Failed to load data-sync-service.js')"></script>
-    <script src="debug-supabase-connection.js"></script>
-    <script src="test-supabase-save.js"></script>
     <!-- Auth Ready Checker - ensures Auth is loaded before allowing form submission -->
     <script>
         // Global Auth ready checker with auto-retry
