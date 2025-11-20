@@ -600,9 +600,19 @@
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+            // Get and sanitize input
+            let email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value; // Don't trim password
             const rememberMe = document.getElementById('rememberMe').checked;
+            
+            // Sanitize email
+            if (typeof Utils !== 'undefined' && Utils.escapeHTML) {
+                email = Utils.escapeHTML(email).toLowerCase();
+            } else {
+                email = email.toLowerCase();
+                // Basic HTML escaping
+                email = email.replace(/[<>]/g, '');
+            }
 
             // Hide previous messages
             errorMessage.classList.remove('show');

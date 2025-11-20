@@ -146,14 +146,49 @@ const Auth = {
      */
     async register(username, email, password) {
         try {
+            // Validate and sanitize input
+            username = (username || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
+            email = (email || '').trim().toLowerCase().replace(/[<>]/g, '');
+            
+            // Validate username format
+            if (!username || username.length < 3 || username.length > 20) {
+                return {
+                    success: false,
+                    message: 'Tên đăng nhập phải từ 3-20 ký tự và chỉ chứa chữ cái, số, dấu gạch dưới và dấu gạch ngang!'
+                };
+            }
+            
+            if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+                return {
+                    success: false,
+                    message: 'Tên đăng nhập chỉ được chứa chữ cái, số, dấu gạch dưới và dấu gạch ngang!'
+                };
+            }
+            
+            // Validate email format
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                return {
+                    success: false,
+                    message: 'Email không hợp lệ!'
+                };
+            }
+            
+            // Validate password
+            if (!password || password.length < 8) {
+                return {
+                    success: false,
+                    message: 'Mật khẩu phải có ít nhất 8 ký tự!'
+                };
+            }
+            
             if (this.isSupabaseAvailable()) {
                 // Use Supabase Auth
                 const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email: email.trim().toLowerCase(),
+                    email: email,
                     password: password,
                     options: {
                         data: {
-                            username: username.trim()
+                            username: username
                         }
                     }
                 });
@@ -264,6 +299,18 @@ const Auth = {
      */
     async login(identifier, password, rememberMe = false) {
         try {
+            // Sanitize input
+            identifier = (identifier || '').trim();
+            identifier = identifier.replace(/[<>]/g, ''); // Basic HTML escaping
+            
+            // Validate input
+            if (!identifier || !password) {
+                return {
+                    success: false,
+                    message: 'Vui lòng điền đầy đủ thông tin!'
+                };
+            }
+            
             if (this.isSupabaseAvailable()) {
                 // First, try to find user by email (Supabase uses email for auth)
                 let email = identifier;

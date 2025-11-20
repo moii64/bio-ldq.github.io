@@ -729,11 +729,35 @@
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const username = document.getElementById('username').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+            // Get and sanitize input
+            let username = document.getElementById('username').value.trim();
+            let email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value; // Don't trim password
             const confirmPassword = document.getElementById('confirmPassword').value;
             const agreeTerms = document.getElementById('agreeTerms').checked;
+            
+            // Sanitize username - only allow alphanumeric, underscore, and hyphen
+            username = username.replace(/[^a-zA-Z0-9_-]/g, '');
+            
+            // Sanitize email
+            if (typeof Utils !== 'undefined' && Utils.escapeHTML) {
+                email = Utils.escapeHTML(email).toLowerCase();
+            } else {
+                email = email.toLowerCase();
+                // Basic HTML escaping
+                email = email.replace(/[<>]/g, '');
+            }
+            
+            // Validate username format after sanitization
+            if (username.length < 3 || username.length > 20) {
+                showError('Tên đăng nhập phải từ 3-20 ký tự và chỉ chứa chữ cái, số, dấu gạch dưới và dấu gạch ngang!');
+                return;
+            }
+            
+            if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+                showError('Tên đăng nhập chỉ được chứa chữ cái, số, dấu gạch dưới và dấu gạch ngang!');
+                return;
+            }
 
             // Hide previous messages
             errorMessage.classList.remove('show');
