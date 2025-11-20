@@ -1,0 +1,440 @@
+.assistive-touch-container {
+  position: fixed;
+  z-index: 9999;
+  user-select: none;
+  pointer-events: auto;
+  will-change: transform;
+}
+
+.assistive-touch-container.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+  transition: all 0.3s ease;
+}
+
+.assistive-touch-container.snapping {
+  animation: snapBounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Nút chính - Tròn */
+.assistive-touch-button {
+  width: 60px;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.assistive-touch-button:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+.assistive-touch-button:active,
+.assistive-touch-button.dragging {
+  cursor: grabbing;
+  transform: scale(0.95);
+}
+
+.assistive-touch-button.open {
+  background: rgba(99, 102, 241, 0.9);
+  transform: rotate(90deg);
+}
+
+.assistive-touch-button.open:hover {
+  background: rgba(99, 102, 241, 1);
+}
+
+.assistive-touch-button.snapping {
+  animation: snapBounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Ripple Effect */
+.ripple-effect {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: translate(-50%, -50%);
+  animation: ripple 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 120px;
+    height: 120px;
+    opacity: 0;
+  }
+}
+
+/* Icon */
+.menu-icon {
+  width: 24px;
+  height: 24px;
+  color: white;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.menu-icon.open {
+  transform: rotate(180deg);
+}
+
+/* Menu */
+.assistive-touch-menu {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 12px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  min-width: 160px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  pointer-events: auto;
+  
+  /* Animation */
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
+  transform-origin: bottom right;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  visibility: hidden;
+}
+
+.assistive-touch-menu.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  animation: menuSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.assistive-touch-menu.closed {
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
+  visibility: hidden;
+}
+
+/* User Header */
+.assistive-touch-user-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  opacity: 0;
+  transform: translateX(-10px);
+  animation: menuItemSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.assistive-touch-menu.open .assistive-touch-user-header {
+  animation: menuItemSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-avatar-placeholder {
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.user-email {
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Menu Item */
+.assistive-touch-menu-item {
+  padding: 12px 16px;
+  border: none;
+  background: rgba(240, 240, 240, 0.8);
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  text-align: left;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+/* Logout button styling */
+.assistive-touch-logout {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  margin-top: 4px;
+  border-top: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+}
+
+.assistive-touch-logout:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #b91c1c;
+  transform: translateX(4px);
+}
+
+.assistive-touch-logout .menu-item-icon {
+  font-size: 18px;
+}
+
+.assistive-touch-menu.open .assistive-touch-menu-item {
+  animation: menuItemSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.assistive-touch-menu-item:hover {
+  background: rgba(99, 102, 241, 0.1);
+  transform: translateX(4px);
+  color: #6366f1;
+}
+
+.assistive-touch-menu-item:active {
+  transform: translateX(2px) scale(0.98);
+}
+
+.menu-item-icon {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+}
+
+.menu-item-label {
+  flex: 1;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .assistive-touch-menu {
+    background: rgba(30, 30, 30, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .assistive-touch-user-header {
+    background: rgba(99, 102, 241, 0.2);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+  }
+
+  .user-name {
+    color: #fff;
+  }
+
+  .user-email {
+    color: #aaa;
+  }
+
+  .assistive-touch-menu-item {
+    background: rgba(50, 50, 50, 0.8);
+    color: #fff;
+  }
+
+  .assistive-touch-menu-item:hover {
+    background: rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
+  }
+
+  .assistive-touch-logout {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+  }
+
+  .assistive-touch-logout:hover {
+    background: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+  .assistive-touch-button {
+    width: 56px;
+    height: 56px;
+  }
+
+  .assistive-touch-menu {
+    min-width: 140px;
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .assistive-touch-menu-item {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+}
+
+/* Animation khi mở/đóng */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeOutScale {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+}
+
+/* Pulse animation khi hover button */
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(99, 102, 241, 0.5);
+  }
+}
+
+.assistive-touch-button:not(.dragging):hover {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Snap bounce animation */
+@keyframes snapBounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Menu slide in animation */
+@keyframes menuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Menu item staggered animation */
+@keyframes menuItemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Menu item ripple effect */
+.assistive-touch-menu-item::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.assistive-touch-menu-item:active::before {
+  width: 200px;
+  height: 200px;
+}
+
+/* Improved drag cursor */
+.assistive-touch-button.dragging {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+/* Smooth transitions */
+.assistive-touch-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.assistive-touch-button:not(.dragging) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+

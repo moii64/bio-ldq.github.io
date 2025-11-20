@@ -12,6 +12,8 @@ import WebsitePage from './pages/WebsitePage';
 import ContactPage from './pages/ContactPage';
 import CVPage from './pages/CVPage';
 import ThemeSelector from './components/ThemeSelector';
+import AssistiveTouch from './components/AssistiveTouch';
+import supabase from './supabaseClient';
 import './App.css';
 
 interface Task {
@@ -58,6 +60,7 @@ function App() {
   const [showChatModal, setShowChatModal] = useState<boolean>(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'completed'>('all');
+  const [user, setUser] = useState<any>(null);
 
   // Save tasks to localStorage whenever tasks change
   useEffect(() => {
@@ -86,6 +89,32 @@ function App() {
 
     return () => clearTimeout(timer);
   }, []); // Chỉ chạy một lần khi component mount
+
+  // Lấy thông tin user từ Supabase
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user);
+    };
+
+    getUser();
+
+    // Lắng nghe thay đổi auth state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Hàm đăng xuất
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    window.location.href = '/';
+  };
 
   const addTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'completed'>) => {
     const newTask: Task = {
@@ -187,6 +216,62 @@ function App() {
         {showChatModal && (
           <ChatModal onClose={() => setShowChatModal(false)} />
         )}
+
+        {/* AssistiveTouch Component */}
+        <AssistiveTouch
+          menuItems={[
+            {
+              label: 'Scroll to Top',
+              icon: '⬆️',
+              action: () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              },
+            },
+            {
+              label: 'Add Task',
+              icon: '➕',
+              action: () => {
+                openTaskModal();
+              },
+            },
+            {
+              label: 'Tasks',
+              icon: '📋',
+              action: () => {
+                window.location.href = '/tasks';
+              },
+            },
+            {
+              label: 'Contact',
+              icon: '📧',
+              action: () => {
+                window.location.href = '/contact';
+              },
+            },
+            {
+              label: 'Chat Support',
+              icon: '💬',
+              action: () => {
+                setShowChatModal(true);
+              },
+            },
+            {
+              label: 'Toggle Theme',
+              icon: '🎨',
+              action: () => {
+                const currentTheme = localStorage.getItem('bioTheme') || 'gradient';
+                const newTheme = currentTheme === 'gradient' ? 'glassmorphism' : 'gradient';
+                setTheme(newTheme);
+              },
+            },
+          ]}
+          user={user}
+          onLogout={handleLogout}
+          enableHaptic={true}
+          enableSound={false}
+          snapToEdges={true}
+          autoHideOnScroll={false}
+        />
       </div>
     </Router>
   );
