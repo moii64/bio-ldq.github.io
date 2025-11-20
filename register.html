@@ -560,6 +560,12 @@
         </div>
     </div>
 
+    <!-- Utility functions -->
+    <script src="utils.js"></script>
+    <!-- Form validator -->
+    <script src="form-validator.js"></script>
+    <!-- Analytics -->
+    <script src="analytics.js"></script>
     <!-- Load Supabase config (optional - falls back to defaults in auth-supabase.js) -->
     <script src="config.js"></script>
     <!-- Using Supabase for authentication (falls back to localStorage if not configured) -->
@@ -668,8 +674,33 @@
             return { level: Math.min(strength, 4), text, color };
         }
 
-        // Form validation
+        // Initialize form validator (wait for FormValidator to be available)
         const registerForm = document.getElementById('registerForm');
+        let validator = null;
+        
+        // Wait for FormValidator to be available
+        if (typeof FormValidator !== 'undefined') {
+            try {
+                validator = new FormValidator(registerForm);
+                // Add validation rules
+                validator.addRule('username', FormValidator.rules.required, 'Vui lòng nhập tên đăng nhập');
+                validator.addRule('username', FormValidator.rules.minLength(3), 'Tên đăng nhập phải có ít nhất 3 ký tự');
+                validator.addRule('username', FormValidator.rules.maxLength(20), 'Tên đăng nhập không được quá 20 ký tự');
+                validator.addRule('email', FormValidator.rules.required, 'Vui lòng nhập email');
+                validator.addRule('email', FormValidator.rules.email, 'Email không hợp lệ');
+                validator.addRule('password', FormValidator.rules.required, 'Vui lòng nhập mật khẩu');
+                validator.addRule('password', FormValidator.rules.password, 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số');
+                validator.addRule('confirmPassword', FormValidator.rules.required, 'Vui lòng xác nhận mật khẩu');
+                validator.addRule('confirmPassword', (value, field) => {
+                    const password = document.getElementById('password').value;
+                    return value === password;
+                }, 'Mật khẩu xác nhận không khớp');
+            } catch (error) {
+                console.warn('FormValidator initialization failed:', error);
+            }
+        }
+
+        // Form validation
         const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
         const submitButton = document.getElementById('submitButton');
@@ -698,40 +729,71 @@
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const username = document.getElementById('username').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+            // Get and sanitize input
+            let username = document.getElementById('username').value.trim();
+            let email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value; // Don't trim password
             const confirmPassword = document.getElementById('confirmPassword').value;
             const agreeTerms = document.getElementById('agreeTerms').checked;
+            
+            // Sanitize username - only allow alphanumeric, underscore, and hyphen
+            username = username.replace(/[^a-zA-Z0-9_-]/g, '');
+            
+            // Sanitize email
+            if (typeof Utils !== 'undefined' && Utils.escapeHTML) {
+                email = Utils.escapeHTML(email).toLowerCase();
+            } else {
+                email = email.toLowerCase();
+                // Basic HTML escaping
+                email = email.replace(/[<>]/g, '');
+            }
+            
+            // Validate username format after sanitization
+            if (username.length < 3 || username.length > 20) {
+                showError('Tên đăng nhập phải từ 3-20 ký tự và chỉ chứa chữ cái, số, dấu gạch dưới và dấu gạch ngang!');
+                return;
+            }
+            
+            if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+                showError('Tên đăng nhập chỉ được chứa chữ cái, số, dấu gạch dưới và dấu gạch ngang!');
+                return;
+            }
 
             // Hide previous messages
             errorMessage.classList.remove('show');
             successMessage.classList.remove('show');
 
-            // Validate
-            if (!username || !email || !password || !confirmPassword) {
-                showError('Vui lòng điền đầy đủ thông tin!');
-                return;
-            }
+            // Validate using FormValidator if available, otherwise use basic validation
+            if (validator) {
+                if (!validator.validate()) {
+                    return; // FormValidator will show errors
+                }
+            } else {
+                // Basic validation fallback
+                if (!username || !email || !password || !confirmPassword) {
+                    showError('Vui lòng điền đầy đủ thông tin!');
+                    return;
+                }
 
-            if (username.length < 3 || username.length > 20) {
-                showError('Tên đăng nhập phải từ 3-20 ký tự!');
-                return;
-            }
+                if (username.length < 3 || username.length > 20) {
+                    showError('Tên đăng nhập phải từ 3-20 ký tự!');
+                    return;
+                }
 
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                showError('Email không hợp lệ!');
-                return;
-            }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    showError('Email không hợp lệ!');
+                    return;
+                }
 
-            if (password.length < 8) {
-                showError('Mật khẩu phải có ít nhất 8 ký tự!');
-                return;
-            }
+                if (password.length < 8) {
+                    showError('Mật khẩu phải có ít nhất 8 ký tự!');
+                    return;
+                }
 
-            if (password !== confirmPassword) {
-                showError('Mật khẩu xác nhận không khớp!');
-                return;
+                if (password !== confirmPassword) {
+                    showError('Mật khẩu xác nhận không khớp!');
+                    return;
+                }
             }
 
             if (!agreeTerms) {
@@ -791,12 +853,47 @@
                 const result = await Auth.register(username, email, password);
                 
                 if (result.success) {
-                    showSuccess('Đăng ký thành công! Đang chuyển hướng...');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 1500);
+                    // Track successful registration
+                    if (typeof Analytics !== 'undefined') {
+                        Analytics.log('auth', { type: 'register_success', timestamp: new Date().toISOString() });
+                    }
+                    
+                    // Check if auto-login was successful
+                    if (result.autoLogin) {
+                        if (typeof Utils !== 'undefined' && Utils.Toast) {
+                            Utils.Toast.success('Đăng ký và đăng nhập thành công!', 'Đang chuyển hướng...');
+                        } else {
+                            showSuccess('Đăng ký và đăng nhập thành công! Đang chuyển hướng...');
+                        }
+                        
+                        // Redirect to home page
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1000);
+                    } else {
+                        if (typeof Utils !== 'undefined' && Utils.Toast) {
+                            Utils.Toast.success(result.message || 'Đăng ký thành công!', 'Vui lòng đăng nhập');
+                        } else {
+                            showSuccess(result.message || 'Đăng ký thành công! Vui lòng đăng nhập.');
+                        }
+                        
+                        // Redirect to login page
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    }
                 } else {
-                    showError(result.message || 'Đăng ký thất bại! Vui lòng thử lại.');
+                    // Track failed registration
+                    if (typeof Analytics !== 'undefined') {
+                        Analytics.log('auth', { type: 'register_failed', reason: result.message, timestamp: new Date().toISOString() });
+                    }
+                    
+                    const errorMsg = result.message || 'Đăng ký thất bại! Vui lòng thử lại.';
+                    if (typeof Utils !== 'undefined' && Utils.Toast) {
+                        Utils.Toast.error(errorMsg);
+                    } else {
+                        showError(errorMsg);
+                    }
                     submitButton.disabled = false;
                     submitButton.innerHTML = '<i class="fas fa-user-plus"></i> Đăng Ký';
                 }
