@@ -167,13 +167,14 @@ const Auth = {
 
                 // Create user profile in profiles table
                 if (authData.user) {
+                    // Try to create profile, but don't fail if it already exists
                     const { error: profileError } = await supabase
                         .from('profiles')
-                        .insert({
+                        .upsert({
                             id: authData.user.id,
                             username: username.trim(),
                             email: email.trim().toLowerCase(),
-                            profile: {
+                            profile_data: {
                                 name: username,
                                 bio: '',
                                 image: '',
@@ -185,23 +186,61 @@ const Auth = {
                                 theme: 'gradient',
                                 seasonalEffects: true
                             },
-                            created_at: new Date().toISOString()
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        }, {
+                            onConflict: 'id'
                         });
 
                     if (profileError) {
                         console.error('Profile creation error:', profileError);
-                        // User is created but profile failed - still return success
+                        // Try to continue anyway - profile might exist or be created later
                     }
 
-                    return {
-                        success: true,
-                        message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.',
-                        user: {
-                            id: authData.user.id,
+                    // Auto-login after registration if session is available
+                    // Supabase might require email confirmation, so we check session
+                    const { data: { session } } = await supabase.auth.getSession();
+                    
+                    if (session && session.user) {
+                        // User is automatically logged in, save session
+                        const sessionData = {
+                            userId: session.user.id,
+                            username: username.trim(),
+                            email: email.trim().toLowerCase(),
+                            loginTime: new Date().toISOString(),
+                            rememberMe: true
+                        };
+                        
+                        localStorage.setItem(this.SESSION_KEY, JSON.stringify(sessionData));
+                        localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify({
+                            id: session.user.id,
                             username: username.trim(),
                             email: email.trim().toLowerCase()
-                        }
-                    };
+                        }));
+
+                        return {
+                            success: true,
+                            message: 'Đăng ký thành công! Đã tự động đăng nhập.',
+                            user: {
+                                id: session.user.id,
+                                username: username.trim(),
+                                email: email.trim().toLowerCase()
+                            },
+                            autoLogin: true
+                        };
+                    } else {
+                        // Email confirmation might be required
+                        return {
+                            success: true,
+                            message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản (nếu cần).',
+                            user: {
+                                id: authData.user.id,
+                                username: username.trim(),
+                                email: email.trim().toLowerCase()
+                            },
+                            requiresConfirmation: true
+                        };
+                    }
                 }
             } else {
                 // Fallback to localStorage
@@ -231,14 +270,22 @@ const Auth = {
                 
                 // If identifier might be username, try to find email
                 if (!identifier.includes('@')) {
-                    const { data: profile } = await supabase
-                        .from('profiles')
-                        .select('email')
-                        .eq('username', identifier.toLowerCase())
-                        .single();
-                    
-                    if (profile) {
-                        email = profile.email;
+                    try {
+                        const { data: profile, error: profileError } = await supabase
+                            .from('profiles')
+                            .select('email')
+                            .eq('username', identifier.toLowerCase())
+                            .maybeSingle();
+                        
+                        if (profile && profile.email) {
+                            email = profile.email;
+                        } else if (profileError) {
+                            console.warn('Profile lookup error:', profileError);
+                            // Continue with identifier as email - might work if username matches email
+                        }
+                    } catch (error) {
+                        console.warn('Error looking up username:', error);
+                        // Continue with identifier as email
                     }
                 }
 
@@ -376,25 +423,47 @@ const Auth = {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return null;
 
+            // Try to get profile from Supabase
             const { data: profile, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', session.user.id)
-                .single();
+                .maybeSingle();
 
-            if (error) {
+            if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
                 console.error('Get user error:', error);
-                return null;
             }
 
+            // If profile exists, use it
+            if (profile) {
+                return {
+                    id: profile.id,
+                    username: profile.username || session.user.user_metadata?.username || session.user.email,
+                    email: profile.email || session.user.email,
+                    profile: profile.profile_data || profile.profile || {},
+                    links: profile.links || [],
+                    tasks: profile.tasks || [],
+                    settings: profile.settings || {}
+                };
+            }
+
+            // If no profile exists, create a basic user object from session
             return {
-                id: profile.id,
-                username: profile.username,
-                email: profile.email,
-                profile: profile.profile || {},
-                links: profile.links || [],
-                tasks: profile.tasks || [],
-                settings: profile.settings || {}
+                id: session.user.id,
+                username: session.user.user_metadata?.username || session.user.email?.split('@')[0] || 'user',
+                email: session.user.email,
+                profile: {
+                    name: session.user.user_metadata?.username || session.user.email?.split('@')[0] || 'User',
+                    bio: '',
+                    image: '',
+                    socialLinks: {}
+                },
+                links: [],
+                tasks: [],
+                settings: {
+                    theme: 'gradient',
+                    seasonalEffects: true
+                }
             };
         }
 

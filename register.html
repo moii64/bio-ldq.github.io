@@ -834,15 +834,30 @@
                         Analytics.log('auth', { type: 'register_success', timestamp: new Date().toISOString() });
                     }
                     
-                    if (typeof Utils !== 'undefined' && Utils.Toast) {
-                        Utils.Toast.success('Đăng ký thành công!', 'Đang chuyển hướng...');
+                    // Check if auto-login was successful
+                    if (result.autoLogin) {
+                        if (typeof Utils !== 'undefined' && Utils.Toast) {
+                            Utils.Toast.success('Đăng ký và đăng nhập thành công!', 'Đang chuyển hướng...');
+                        } else {
+                            showSuccess('Đăng ký và đăng nhập thành công! Đang chuyển hướng...');
+                        }
+                        
+                        // Redirect to home page
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1000);
                     } else {
-                        showSuccess('Đăng ký thành công! Đang chuyển hướng...');
+                        if (typeof Utils !== 'undefined' && Utils.Toast) {
+                            Utils.Toast.success(result.message || 'Đăng ký thành công!', 'Vui lòng đăng nhập');
+                        } else {
+                            showSuccess(result.message || 'Đăng ký thành công! Vui lòng đăng nhập.');
+                        }
+                        
+                        // Redirect to login page
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
                     }
-                    
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 1500);
                 } else {
                     // Track failed registration
                     if (typeof Analytics !== 'undefined') {
